@@ -2476,27 +2476,49 @@
                     updateDashboardProfile();
                     showMessage("Welcome back, " + existingUser.name + "!");
                 } else {
-                    // NEW USER - DIRECT LOGIN (Deferred enrollment)
-                    const username = name.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000);
-                    const newUser = {
-                        username: username,
-                        email: email,
-                        name: name,
-                        role: 'student',
-                        id: "STU" + Math.floor(Math.random() * 100000),
-                        course: 'B.Tech CS',
-                        descriptor: null // Face not registered yet
-                    };
-
-                    registeredUsers[username] = newUser;
+                    // NEW USER - Check if student is added by admin
+                    // Find admin-added student by email or name and get their key
+                    let adminAddedKey = null;
+                    let adminUser = null;
+                    
+                    for (const key in registeredUsers) {
+                        const user = registeredUsers[key];
+                        if (user.role === 'student') {
+                            // Check by email first
+                            if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
+                                adminAddedKey = key;
+                                adminUser = user;
+                                break;
+                            }
+                            // Check by name if email not found
+                            if (user.name && user.name.toLowerCase() === name.toLowerCase()) {
+                                adminAddedKey = key;
+                                adminUser = user;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!adminAddedKey || !adminUser) {
+                        showMessage("Not allowed. Contact admin.");
+                        return;
+                    }
+                    
+                    // Update existing admin-added user entry with email if not present
+                    if (!adminUser.email) {
+                        adminUser.email = email;
+                    }
+                    adminUser.username = adminAddedKey;
+                    
+                    registeredUsers[adminAddedKey] = adminUser;
                     localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
 
-                    loggedInUser = newUser;
+                    loggedInUser = { username: adminAddedKey, ...adminUser };
                     saveSession(loggedInUser);
                     toggleMainApp(true);
                     populateProfileData();
                     updateDashboardProfile();
-                    showMessage("Welcome, " + name + "! Please register face ID during attendance.");
+                    showMessage("Welcome, " + adminUser.name + "! Please register face ID during attendance.");
                 }
 
             } catch (error) {
@@ -2916,17 +2938,31 @@
 
                             const regData = window.pendingRegData || {};
                             // Update existing admin-added user entry instead of creating new one
+                            if (!pendingRegUsername) {
+                                showMessage("Registration error. Please try again.");
+                                stopAllVideo();
+                                goHome();
+                                return;
+                            }
+                            
                             const existingUser = registeredUsers[pendingRegUsername];
+                            if (!existingUser) {
+                                showMessage("User not found. Please contact admin.");
+                                stopAllVideo();
+                                goHome();
+                                return;
+                            }
+                            
                             registeredUsers[pendingRegUsername] = {
                                 ...existingUser, // Preserve existing admin data
                                 descriptor: Array.from(resizedDetections.descriptor),
-                                id: regData.collegeId || existingUser?.id || (pendingRegUsername + "ID"),
+                                id: regData.collegeId || existingUser.id || (pendingRegUsername + "ID"),
                                 role: 'student',
-                                name: regData.fullname || existingUser?.name || pendingRegUsername,
-                                email: regData.email || existingUser?.email || '',
-                                course: regData.course || existingUser?.course || '',
-                                studentClass: regData.studentClass || existingUser?.studentClass || '',
-                                batchId: regData.batchId || existingUser?.batchId || ''
+                                name: regData.fullname || existingUser.name || pendingRegUsername,
+                                email: regData.email || existingUser.email || '',
+                                course: regData.course || existingUser.course || '',
+                                studentClass: regData.studentClass || existingUser.studentClass || '',
+                                batchId: regData.batchId || existingUser.batchId || ''
                             };
                             
                             // If batch is selected, add email to batch
@@ -5440,6 +5476,7 @@
             }
 
             registeredUsers[name] = {
+                username: name, // Set username for consistency
                 descriptor: [],
                 id: id,
                 role: role,
