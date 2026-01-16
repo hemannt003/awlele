@@ -160,8 +160,8 @@
         try {
             const genAI = new GoogleGenerativeAI(API_KEY);
 
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            ({
+            const model = genAI.getGenerativeModel({ 
+                model: "gemini-2.5-flash",
                 systemInstruction: "You are a helpful assistant for the SmartClass student portal. Keep answers concise."
             });
             const chat = model.startChat({ history: [] });
@@ -491,6 +491,36 @@
                         </p>
                     </div>
 
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1 border-t border-gray-700"></div>
+                        <span class="text-sm text-gray-500">or</span>
+                        <div class="flex-1 border-t border-gray-700"></div>
+                    </div>
+
+                    <button id="manual-email-btn" onclick="showManualEmailInput()"
+                        class="w-full py-3 px-4 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium text-base transition-all shadow-md hover:shadow-lg border border-gray-600 hover:border-gray-500">
+                        <i class="fas fa-envelope mr-2"></i>Manually Add Email
+                    </button>
+
+                    <div id="manual-email-container" class="hidden">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                                <input type="email" id="manual-email-input" placeholder="Enter your email"
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleManualEmail(); }">
+                            </div>
+                            <button onclick="handleManualEmail()"
+                                class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-base transition-all shadow-md hover:shadow-lg">
+                                Continue
+                            </button>
+                            <button onclick="hideManualEmailInput()"
+                                class="w-full text-center text-gray-400 hover:text-gray-300 text-sm transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="pt-6 border-t border-gray-700">
                         <button onclick="backToRoles()"
                             class="w-full text-center text-gray-500 hover:text-gray-300 text-sm transition-colors">
@@ -532,7 +562,7 @@
                         <span class="font-semibold" id="nav-username">User</span>
                         <span class="text-sm text-blue-200" id="nav-class">Computer Science</span>
                     </div>
-                    <img class="h-10 w-10 rounded-full border-2 border-white"
+                    <img id="nav-profile-photo" class="h-10 w-10 rounded-full border-2 border-white object-cover"
                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                         alt="Profile">
                     <button class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition"
@@ -568,11 +598,12 @@
             <div class="hidden md:block w-full md:w-1/4 lg:w-1/5">
                 <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
                     <div class="flex flex-col items-center text-center mb-6">
-                        <img class="h-24 w-24 rounded-full mb-4 border-4 border-blue-500"
+                        <img id="sidebar-profile-photo" class="h-24 w-24 rounded-full mb-4 border-4 border-blue-500 object-cover"
                             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                             alt="Profile">
                         <h2 class="text-xl font-bold" id="sidebar-username">User</h2>
                         <p class="text-gray-400" id="sidebar-id">CS2021BATCH</p>
+                        <p class="text-gray-400 text-xs mt-1" id="sidebar-batch">Batch: -</p>
                         <div class="mt-2 bg-green-800 text-green-200 text-xs px-2 py-1 rounded-full">ID Verified</div>
                     </div>
 
@@ -602,6 +633,11 @@
                             class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="profile">
                             <i class="fas fa-user mr-3"></i>Profile
+                        </button>
+                        <button
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
+                            data-tab="results">
+                            <i class="fas fa-poll mr-3"></i>Results
                         </button>
                         <button
                             class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
@@ -656,10 +692,16 @@
                                 class="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 rounded-full bg-blue-300 opacity-10 blur-xl">
                             </div>
                             <div class="relative z-10 flex justify-between items-end">
-                                <div>
-                                    <h1 class="text-3xl font-bold text-white mb-2">Welcome back, <span
-                                            class="banner-username">User</span>!</h1>
-                                    <p class="text-blue-100">Here's what's happening today</p>
+                                <div class="flex items-center gap-4">
+                                    <img id="dashboard-profile-photo" class="h-20 w-20 rounded-full border-4 border-white/30 object-cover shadow-lg"
+                                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
+                                        alt="Profile">
+                                    <div>
+                                        <h1 class="text-3xl font-bold text-white mb-1">Welcome back, <span
+                                                class="banner-username">User</span>!</h1>
+                                        <p class="text-blue-100 mb-1">Here's what's happening today</p>
+                                        <p class="text-blue-200 text-sm" id="dashboard-batch-info">Batch: Not selected</p>
+                                    </div>
                                 </div>
                                 <div class="text-right hidden sm:block">
                                     <div class="text-sm text-blue-200" id="current-date-display">Wednesday, January 14,
@@ -943,20 +985,16 @@
                         <div class="bg-gray-800 p-6 rounded-lg shadow-md min-h-[600px]">
                             <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-6">
                                 <div>
-                                    <h2 class="text-3xl font-bold text-white mb-2">My Schedule</h2>
-                                    <p class="text-gray-400">Manage your weekly classes and timings</p>
+                                    <h2 class="text-3xl font-bold text-white mb-2">My Weekly Schedule</h2>
+                                    <p class="text-gray-400">View your weekly classes and timings</p>
                                 </div>
-                                <div class="flex gap-3">
-                                    <button onclick="document.getElementById('timetable-upload').click()"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl flex items-center shadow-lg shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95 border border-blue-500/30">
-                                        <i class="fas fa-file-upload mr-2"></i> Import Excel/PDF
-                                    </button>
-                                    <input type="file" id="timetable-upload" class="hidden" accept=".xlsx,.xls,.pdf"
-                                        onchange="handleTimetableUpload(this)">
+                                <div class="flex flex-col items-end gap-2">
+                                    <div id="timetable-current-date" class="text-lg font-semibold text-blue-400"></div>
+                                    <div id="timetable-current-time" class="text-sm text-gray-400"></div>
                                 </div>
                             </div>
 
-                            <!-- Timetable Display/Edit Area -->
+                            <!-- Timetable Display Area -->
                             <div id="timetable-display" class="space-y-6">
                                 <!-- Empty State -->
                                 <div id="timetable-empty"
@@ -967,50 +1005,43 @@
                                     </div>
                                     <h3 class="text-2xl font-bold text-gray-200 mb-2">No Schedule Found</h3>
                                     <p class="text-gray-400 max-w-md text-center mb-8 leading-relaxed">
-                                        Upload your class schedule to get started.<br>
-                                        <span class="text-sm opacity-70">Supported formats: Excel (.xlsx) or PDF with 3
-                                            columns (Teacher, Subject, Time)</span>
+                                        Your timetable will appear here once your batch schedule is set by the administrator.
                                     </p>
-                                    <button onclick="document.getElementById('timetable-upload').click()"
-                                        class="text-blue-400 hover:text-blue-300 font-semibold hover:underline decoration-2 underline-offset-4">
-                                        Browse from computer
-                                    </button>
                                 </div>
 
-                                <!-- Table Editor (Hidden initially) -->
+                                <!-- Week-wise Timetable Grid (Hidden initially) -->
                                 <div id="timetable-container" class="hidden animate-fade-in">
-                                    <div
-                                        class="overflow-hidden rounded-2xl border border-gray-700/50 shadow-2xl bg-[#0b1220]">
-                                        <table class="w-full text-left border-collapse">
+                                    <div class="overflow-x-auto">
+                                        <table id="student-timetable-grid" class="w-full border-collapse bg-gray-900/50 rounded-lg">
                                             <thead>
-                                                <tr
-                                                    class="bg-gray-900/50 text-gray-400 text-sm uppercase tracking-wider">
-                                                    <th class="p-5 font-semibold border-b border-gray-800">Time / Slot
-                                                    </th>
-                                                    <th class="p-5 font-semibold border-b border-gray-800">Subject</th>
-                                                    <th class="p-5 font-semibold border-b border-gray-800">Teacher</th>
-                                                    <th class="p-5 font-semibold border-b border-gray-800 text-right">
-                                                        Actions
-                                                    </th>
+                                                <tr class="bg-gray-800">
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Time</th>
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Monday</th>
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Tuesday</th>
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Wednesday</th>
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Thursday</th>
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Friday</th>
+                                                    <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Saturday</th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="timetable-body"
-                                                class="divide-y divide-gray-800/50 text-gray-300">
-                                                <!-- Rows will be injected here -->
+                                            <tbody id="student-timetable-body">
+                                                <!-- Dynamic schedule rows -->
                                             </tbody>
                                         </table>
                                     </div>
-
-                                    <div
-                                        class="flex justify-between items-center mt-6 pt-6 border-t border-gray-700/30 sticky bottom-0 bg-gray-800 backdrop-blur-sm z-10">
-                                        <button onclick="addTimetableRow()"
-                                            class="text-blue-400 hover:text-blue-300 font-medium flex items-center px-4 py-2 hover:bg-blue-500/10 rounded-lg transition-colors">
-                                            <i class="fas fa-plus-circle mr-2"></i> Add Class Slot
-                                        </button>
-                                        <button onclick="saveTimetableComp()"
-                                            class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-green-500/20 transition-all transform hover:-translate-y-1 active:translate-y-0">
-                                            Save Schedule
-                                        </button>
+                                    <div class="mt-6 flex items-center gap-4 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 bg-blue-600 rounded"></div>
+                                            <span class="text-gray-400">Upcoming</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 bg-gray-600 rounded"></div>
+                                            <span class="text-gray-400">Completed</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 bg-green-600 rounded"></div>
+                                            <span class="text-gray-400">Current</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1206,10 +1237,14 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                 <div class="md:col-span-1 flex flex-col items-center">
-                                    <img class="h-32 w-32 rounded-full mb-4 border-4 border-blue-500"
+                                    <img id="profile-photo-img" class="h-32 w-32 rounded-full mb-4 border-4 border-blue-500 object-cover"
                                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                                         alt="Profile">
-                                    <button class="text-blue-400 text-sm mt-2">Change Photo</button>
+                                    <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleProfilePhotoChange(event)">
+                                    <button onclick="document.getElementById('profile-photo-input').click()" 
+                                        class="text-blue-400 hover:text-blue-300 text-sm mt-2 transition">
+                                        Change Photo
+                                    </button>
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -1238,15 +1273,11 @@
                                         </div>
                                         <div>
                                             <label
-                                                class="block text-sm font-medium text-gray-400 mb-1">Class/Section</label>
-                                            <select id="profile-class"
-                                                class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:border-blue-500 outline-none">
-                                                <option value="">Select your class</option>
-                                                <option value="Computer Science - A">Computer Science - A</option>
-                                                <option value="Computer Science - B">Computer Science - B</option>
-                                                <option value="Mechanical Eng - A">Mechanical Eng - A</option>
-                                                <option value="Data Structures">Data Structures</option>
-                                                <option value="Algorithms">Algorithms</option>
+                                                class="block text-sm font-medium text-gray-400 mb-1">Batch</label>
+                                            <select id="profile-batch"
+                                                class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:border-blue-500 outline-none"
+                                                onchange="updateStudentBatch()">
+                                                <option value="">Select your batch</option>
                                             </select>
                                         </div>
                                     </div>
@@ -1255,16 +1286,17 @@
 
                             <div class="mb-6">
                                 <h3 class="text-lg font-semibold mb-3">Interests</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm">Web
-                                        Development</span>
-                                    <span class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm">Machine
-                                        Learning</span>
-                                    <span class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm">Data
-                                        Structures</span>
-                                    <span
-                                        class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm">Algorithms</span>
-                                    <button class="text-blue-400 text-sm">+ Add more</button>
+                                <div id="skills-container" class="flex flex-wrap gap-2 mb-3">
+                                    <!-- Skills will be dynamically rendered here -->
+                                </div>
+                                <div class="flex gap-2 items-center">
+                                    <input type="text" id="new-skill-input" 
+                                        placeholder="Enter a skill/interest"
+                                        class="px-3 py-1 border border-gray-600 rounded-lg bg-gray-700 text-white text-sm focus:border-blue-500 outline-none">
+                                    <button onclick="addSkill()" 
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-lg text-sm">
+                                        Add Skill
+                                    </button>
                                 </div>
                             </div>
 
@@ -1278,6 +1310,25 @@
                                 <button id="saveProfileBtn"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">Save
                                     Changes</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Tab -->
+                    <div id="results" class="tab-content">
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 class="text-2xl font-bold mb-6">My Results</h2>
+                            <p class="text-gray-400 mb-6">View your examination results subject-wise</p>
+                            
+                            <div id="student-results-container">
+                                <!-- Results will be dynamically loaded here -->
+                                <div id="student-results-empty" class="text-center py-12">
+                                    <div class="w-20 h-20 rounded-full bg-gray-700/50 flex items-center justify-center mb-6 mx-auto">
+                                        <i class="fas fa-poll text-3xl text-gray-500"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-200 mb-2">No Results Available</h3>
+                                    <p class="text-gray-400">Your results will appear here once your teacher enters them.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1397,8 +1448,13 @@
                         </button>
                         <button
                             class="tab-btn-admin w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
+                            data-tab="admin-batch">
+                            <i class="fas fa-users mr-3"></i>Batch Management
+                        </button>
+                        <button
+                            class="tab-btn-admin w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="admin-timetable">
-                            <i class="fas fa-calendar-alt mr-3"></i>Timetable
+                            <i class="fas fa-calendar-alt mr-3"></i>Schedule
                         </button>
                         <button
                             class="tab-btn-admin w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
@@ -1445,6 +1501,8 @@
                                         <input type="text" id="admin-add-name" placeholder="Full Name"
                                             class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 outline-none">
                                         <input type="text" id="admin-add-id" placeholder="ID (e.g. CS202501)"
+                                            class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 outline-none">
+                                        <input type="email" id="admin-add-email" placeholder="Email (optional, for student registration)"
                                             class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 outline-none">
                                         <select id="admin-add-role"
                                             class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 outline-none">
@@ -1512,7 +1570,7 @@
                                             <th class="p-4">Name</th>
                                             <th class="p-4">ID</th>
                                             <th class="p-4">Role</th>
-                                            <th class="p-4 text-right">Status</th>
+                                            <th class="p-4 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="admin-user-table-body" class="divide-y divide-gray-800 bg-gray-800/50">
@@ -1566,42 +1624,182 @@
                     </div>
                 </div>
 
-                <!-- Timetable Management Tab -->
-                <div id="admin-timetable" class="tab-content-admin hidden">
-                    <div class="bg-gray-800 p-8 rounded-2xl shadow-lg text-center py-20">
-                        <div
-                            class="w-24 h-24 rounded-full bg-gray-700/50 flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-calendar-alt text-4xl text-gray-500"></i>
+                <!-- Batch Management Tab -->
+                <div id="admin-batch" class="tab-content-admin hidden">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+                        <h2 class="text-2xl font-bold mb-4">Batch Management</h2>
+                        
+                        <!-- Batch Actions -->
+                        <div class="flex space-x-4 mb-6 border-b border-gray-700 pb-2">
+                            <button onclick="showBatchSection('create')"
+                                class="sub-tab-btn text-blue-400 font-semibold border-b-2 border-blue-400 pb-1"
+                                data-sub="create">Create Batch</button>
+                            <button onclick="showBatchSection('add-student')"
+                                class="sub-tab-btn text-gray-400 hover:text-white font-semibold pb-1"
+                                data-sub="add-student">Add Student</button>
+                            <button onclick="showBatchSection('add-teacher')"
+                                class="sub-tab-btn text-gray-400 hover:text-white font-semibold pb-1"
+                                data-sub="add-teacher">Add Teacher</button>
+                            <button onclick="showBatchSection('view')"
+                                class="sub-tab-btn text-gray-400 hover:text-white font-semibold pb-1"
+                                data-sub="view">View Batches</button>
                         </div>
-                        <h2 class="text-2xl font-bold text-white mb-2">Master Schedule Management</h2>
-                        <p class="text-gray-400 max-w-lg mx-auto mb-8">View and edit institution-wide timetables. Select
-                            a department to begin.</p>
-                        <button
-                            class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition">
-                            Open Scheduler Tool
-                        </button>
+
+                        <!-- Create Batch Section -->
+                        <div id="batch-sub-create" class="batch-sub-content">
+                            <div class="max-w-md">
+                                <h3 class="text-lg font-semibold mb-3 text-purple-300">Create New Batch</h3>
+                                <div class="space-y-4">
+                                    <input type="text" id="batch-name" placeholder="Batch Name (e.g., CS2024-A)"
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 outline-none">
+                                    <input type="text" id="batch-description" placeholder="Description (optional)"
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 outline-none">
+                                    <button onclick="createBatch()"
+                                        class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition">
+                                        Create Batch
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Student Section -->
+                        <div id="batch-sub-add-student" class="batch-sub-content hidden">
+                            <div class="max-w-md">
+                                <h3 class="text-lg font-semibold mb-3 text-green-300">Add Student to Batch</h3>
+                                <div class="space-y-4">
+                                    <select id="batch-select-student" 
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-green-500 outline-none">
+                                        <option value="">Select Batch</option>
+                                    </select>
+                                    <input type="text" id="student-full-name" placeholder="Full Name"
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-green-500 outline-none">
+                                    <input type="email" id="student-email" placeholder="Student Email"
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-green-500 outline-none">
+                                    <div id="student-email-status" class="text-sm text-gray-400"></div>
+                                    <button onclick="addStudentToBatch()"
+                                        class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-500/20 transition">
+                                        Add Student
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Teacher Section -->
+                        <div id="batch-sub-add-teacher" class="batch-sub-content hidden">
+                            <div class="max-w-md">
+                                <h3 class="text-lg font-semibold mb-3 text-yellow-300">Add Teacher to Batch</h3>
+                                <div class="space-y-4">
+                                    <select id="batch-select-teacher" 
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-yellow-500 outline-none">
+                                        <option value="">Select Batch</option>
+                                    </select>
+                                    <input type="email" id="teacher-email" placeholder="Teacher Email"
+                                        class="w-full p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-yellow-500 outline-none">
+                                    <button onclick="addTeacherToBatch()"
+                                        class="w-full py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl shadow-lg shadow-yellow-500/20 transition">
+                                        Add Teacher
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Batches Section -->
+                        <div id="batch-sub-view" class="batch-sub-content hidden">
+                            <div id="batches-list" class="space-y-4">
+                                <!-- Dynamic batches will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule/Timetable Management Tab -->
+                <div id="admin-timetable" class="tab-content-admin hidden">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+                        <h2 class="text-2xl font-bold mb-4">Schedule Management</h2>
+                        
+                        <!-- Batch Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Select Batch</label>
+                            <select id="schedule-batch-select" 
+                                class="w-full md:w-1/3 p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-blue-500 outline-none"
+                                onchange="loadBatchSchedule()">
+                                <option value="">Select Batch</option>
+                            </select>
+                        </div>
+
+                        <!-- Timetable Grid -->
+                        <div id="schedule-container" class="hidden">
+                            <div class="mb-4 flex justify-between items-center">
+                                <h3 class="text-lg font-semibold">Week-wise Timetable</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="addNewTimeSlot()"
+                                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg shadow-green-500/20 transition flex items-center gap-2">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Add Time Slot</span>
+                                    </button>
+                                    <button onclick="saveBatchSchedule()"
+                                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition">
+                                        Save Schedule
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table id="schedule-grid" class="w-full border-collapse bg-gray-900/50 rounded-lg">
+                                    <thead>
+                                        <tr class="bg-gray-800">
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Time</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Monday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Tuesday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Wednesday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Thursday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Friday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Saturday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="schedule-tbody">
+                                        <!-- Dynamic schedule rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="schedule-empty" class="text-center py-20">
+                            <div class="w-24 h-24 rounded-full bg-gray-700/50 flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-calendar-alt text-4xl text-gray-500"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white mb-2">No Batch Selected</h2>
+                            <p class="text-gray-400">Select a batch to create or edit its schedule</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Result Management Tab -->
                 <div id="admin-results" class="tab-content-admin hidden">
-                    <div class="bg-gray-800 p-8 rounded-2xl shadow-lg">
-                        <h2 class="text-2xl font-bold text-white mb-6">Result Processing</h2>
-                        <div
-                            class="border-2 border-dashed border-gray-600 rounded-2xl p-12 text-center bg-gray-900/30 hover:bg-gray-900/50 transition cursor-pointer group">
-                            <i
-                                class="fas fa-cloud-upload-alt text-5xl text-gray-500 group-hover:text-blue-400 mb-4 transition"></i>
-                            <p class="text-xl font-medium text-white mb-2">Upload Result Sheets</p>
-                            <p class="text-gray-400 text-sm">Drag & drop CSV or Excel files here</p>
-                            <button
-                                class="mt-6 px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-semibold transition">Select
-                                Files</button>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-2xl font-bold text-white mb-6">Results View</h2>
+                        <p class="text-gray-400 mb-6">View all student results by batch. Results are read-only and can only be edited by teachers.</p>
+                        
+                        <!-- Batch Selection -->
+                        <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-700 mb-6">
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Select Batch to View Results</label>
+                            <select id="admin-result-batch" 
+                                class="w-full md:w-1/3 px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:border-purple-500 outline-none"
+                                onchange="loadAdminResults()">
+                                <option value="">Select a batch</option>
+                            </select>
                         </div>
 
-                        <div class="mt-8">
-                            <h3 class="text-lg font-bold mb-4">Recent Uploads</h3>
-                            <div class="bg-gray-900/50 rounded-xl p-4 text-gray-500 text-center text-sm">
-                                No recent uploads found.
+                        <!-- Results Display -->
+                        <div id="admin-results-container">
+                            <!-- Results will be dynamically loaded here -->
+                            <div id="admin-results-empty" class="text-center py-12">
+                                <div class="w-20 h-20 rounded-full bg-gray-700/50 flex items-center justify-center mb-6 mx-auto">
+                                    <i class="fas fa-poll text-3xl text-gray-500"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-200 mb-2">No Batch Selected</h3>
+                                <p class="text-gray-400">Select a batch to view student results.</p>
                             </div>
                         </div>
                     </div>
@@ -1821,25 +2019,62 @@
                 <!-- Timetable Tab -->
                 <div id="teacher-timetable" class="tab-content-teacher hidden">
                     <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-bold mb-6">Your Teaching Schedule</h2>
-                        <div class="grid grid-cols-1 gap-4">
-                            <!-- Placeholder Schedule -->
-                            <div class="flex items-center p-4 bg-blue-900/20 border border-blue-500/10 rounded-xl">
-                                <div class="w-20 text-blue-400 font-bold">MON 09:00</div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold">Advanced Algorithms</h4>
-                                    <p class="text-xs text-gray-500">Lecture Hall 02</p>
+                        <h2 class="text-2xl font-bold mb-6">Batch Timetables</h2>
+                        
+                        <!-- Batch Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Select Batch</label>
+                            <select id="teacher-batch-select" 
+                                class="w-full md:w-1/3 p-4 bg-gray-700/50 border border-gray-600 rounded-xl text-white focus:border-green-500 outline-none"
+                                onchange="loadTeacherBatchSchedule()">
+                                <option value="">Select Batch</option>
+                            </select>
+                        </div>
+
+                        <!-- Timetable Grid -->
+                        <div id="teacher-schedule-container" class="hidden">
+                            <div class="mb-4 flex justify-between items-center">
+                                <h3 class="text-lg font-semibold">Week-wise Timetable</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="addNewTeacherTimeSlot()"
+                                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg shadow-green-500/20 transition flex items-center gap-2">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Add Time Slot</span>
+                                    </button>
+                                    <button onclick="saveTeacherBatchSchedule()"
+                                        class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg shadow-green-500/20 transition">
+                                        Save Schedule
+                                    </button>
                                 </div>
-                                <span class="text-xs bg-blue-800/40 px-2 py-1 rounded text-blue-200">Upcoming</span>
                             </div>
-                            <div class="flex items-center p-4 bg-gray-700/20 border border-gray-600/10 rounded-xl">
-                                <div class="w-20 text-gray-400 font-bold">MON 11:00</div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold">Project Review</h4>
-                                    <p class="text-xs text-gray-500">Lab 04</p>
-                                </div>
-                                <span class="text-xs bg-gray-700/40 px-2 py-1 rounded text-gray-400">Completed</span>
+                            
+                            <div class="overflow-x-auto">
+                                <table id="teacher-schedule-grid" class="w-full border-collapse bg-gray-900/50 rounded-lg">
+                                    <thead>
+                                        <tr class="bg-gray-800">
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Time</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Monday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Tuesday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Wednesday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Thursday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Friday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Saturday</th>
+                                            <th class="p-3 border border-gray-700 text-gray-300 font-semibold text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-schedule-tbody">
+                                        <!-- Dynamic schedule rows -->
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+
+                        <div id="teacher-schedule-empty" class="text-center py-20">
+                            <div class="w-24 h-24 rounded-full bg-gray-700/50 flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-calendar-alt text-4xl text-gray-500"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white mb-2">No Batch Selected</h2>
+                            <p class="text-gray-400">Select a batch to view or edit its schedule</p>
                         </div>
                     </div>
                 </div>
@@ -1898,17 +2133,80 @@
 
                 <!-- Result Management Section -->
                 <div id="teacher-results" class="tab-content-teacher hidden">
-                    <div
-                        class="bg-gray-800 p-8 rounded-2xl shadow-lg border-2 border-dashed border-gray-700 flex flex-col items-center justify-center text-center py-20">
-                        <div class="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mb-6">
-                            <i class="fas fa-award text-4xl text-gray-500"></i>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h2 class="text-2xl font-bold mb-6">Result Management</h2>
+                        
+                        <!-- Selection Section -->
+                        <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-700 mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Select Batch</label>
+                                    <select id="teacher-result-batch" 
+                                        class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:border-green-500 outline-none"
+                                        onchange="loadStudentsForResultEntry()">
+                                        <option value="">Select a batch</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Subject</label>
+                                    <input type="text" id="teacher-result-subject" 
+                                        placeholder="Enter subject name"
+                                        class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:border-green-500 outline-none"
+                                        oninput="loadStudentsForResultEntry()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Exam Type</label>
+                                    <select id="teacher-result-exam-type" 
+                                        class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:border-green-500 outline-none"
+                                        onchange="loadStudentsForResultEntry()">
+                                        <option value="">Select exam type</option>
+                                        <option value="Midterm">Midterm</option>
+                                        <option value="Final">Final</option>
+                                        <option value="Quiz">Quiz</option>
+                                        <option value="Assignment">Assignment</option>
+                                        <option value="Project">Project</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <h2 class="text-2xl font-bold mb-2">Result Management Portal</h2>
-                        <p class="text-gray-400 max-w-sm mb-8">Process examination results, generate marksheets, and
-                            publish grades for your assigned classes.</p>
-                        <button
-                            class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/20">Open
-                            Gradebook Navigator</button>
+
+                        <!-- Students List and Marks Entry -->
+                        <div id="teacher-result-students-container" class="hidden">
+                            <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-700">
+                                <h3 class="text-lg font-semibold mb-4">Enter Marks for Students</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left">
+                                        <thead>
+                                            <tr class="bg-gray-800">
+                                                <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Roll No</th>
+                                                <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Student Name</th>
+                                                <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Email</th>
+                                                <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Marks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="teacher-result-students-tbody" class="divide-y divide-gray-800">
+                                            <!-- Students will be dynamically loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-4 flex justify-end">
+                                    <button onclick="saveStudentResults()" 
+                                        class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition">
+                                        <i class="fas fa-save mr-2"></i>Save Results
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="teacher-result-empty" class="text-center py-12">
+                            <div class="w-20 h-20 rounded-full bg-gray-700/50 flex items-center justify-center mb-6 mx-auto">
+                                <i class="fas fa-award text-3xl text-gray-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-200 mb-2">Select a Batch to Begin</h3>
+                            <p class="text-gray-400">Choose a batch, subject, and exam type to enter student marks.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -2085,8 +2383,14 @@
         const RADIUS_METERS = 50;
 
         // Utility functions
-        const showMessage = (msg) => { messageText.textContent = msg; messageBox.classList.remove('hidden'); };
-        const hideMessage = () => { messageBox.classList.add('hidden'); };
+        const showMessage = (msg) => { 
+            if (messageText) messageText.textContent = msg; 
+            if (messageBox) messageBox.classList.remove('hidden'); 
+        };
+        const hideMessage = () => { 
+            if (messageBox) messageBox.classList.add('hidden'); 
+        };
+        window.hideMessage = hideMessage; // Make it globally accessible
         const toggleMainApp = (show) => {
             if (show) {
                 authScreens.classList.add('hidden');
@@ -2135,7 +2439,7 @@
 
                 const payload = JSON.parse(jsonPayload);
                 const email = payload.email;
-                const name = payload.name;
+                let name = payload.name;
 
                 // Domain Restriction
                 if (!email.endsWith('@ietdavv.edu.in')) {
@@ -2143,11 +2447,23 @@
                     return;
                 }
 
+                // Check email-to-name mapping (set by admin)
+                const emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+                if (emailToNameMap[email]) {
+                    name = emailToNameMap[email];
+                }
+
                 // Check if user already exists
                 let existingUser = null;
                 for (let username in registeredUsers) {
                     if (registeredUsers[username].email === email) {
                         existingUser = { username, ...registeredUsers[username] };
+                        // Update name if admin has set it
+                        if (emailToNameMap[email] && emailToNameMap[email] !== existingUser.name) {
+                            existingUser.name = emailToNameMap[email];
+                            registeredUsers[username].name = emailToNameMap[email];
+                            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                        }
                         break;
                     }
                 }
@@ -2157,6 +2473,7 @@
                     saveSession(loggedInUser);
                     toggleMainApp(true);
                     populateProfileData();
+                    updateDashboardProfile();
                     showMessage("Welcome back, " + existingUser.name + "!");
                 } else {
                     // NEW USER - DIRECT LOGIN (Deferred enrollment)
@@ -2168,7 +2485,6 @@
                         role: 'student',
                         id: "STU" + Math.floor(Math.random() * 100000),
                         course: 'B.Tech CS',
-                        studentClass: 'Computer Science - A',
                         descriptor: null // Face not registered yet
                     };
 
@@ -2179,12 +2495,147 @@
                     saveSession(loggedInUser);
                     toggleMainApp(true);
                     populateProfileData();
-                    showMessage("Welcome, " + name + "! Please set your class in the Profile tab and register face ID during attendance.");
+                    updateDashboardProfile();
+                    showMessage("Welcome, " + name + "! Please register face ID during attendance.");
                 }
 
             } catch (error) {
                 console.error("Decoding JWT failed", error);
                 showMessage("Authentication failed. Please try again.");
+            }
+        };
+
+        // Manual Email Functions
+        window.showManualEmailInput = () => {
+            const container = document.getElementById('manual-email-container');
+            const input = document.getElementById('manual-email-input');
+            const button = document.getElementById('manual-email-btn');
+            if (container) {
+                container.classList.remove('hidden');
+                if (input) {
+                    input.focus();
+                }
+            }
+            if (button) {
+                button.classList.add('hidden');
+            }
+        };
+
+        window.hideManualEmailInput = () => {
+            const container = document.getElementById('manual-email-container');
+            const input = document.getElementById('manual-email-input');
+            const button = document.getElementById('manual-email-btn');
+            if (container) {
+                container.classList.add('hidden');
+            }
+            if (input) {
+                input.value = '';
+            }
+            if (button) {
+                button.classList.remove('hidden');
+            }
+        };
+
+        window.handleManualEmail = () => {
+            const emailInput = document.getElementById('manual-email-input');
+            const email = emailInput?.value.trim();
+
+            if (!email) {
+                showMessage("Please enter your email address.");
+                return;
+            }
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage("Please enter a valid email address.");
+                return;
+            }
+
+            // Domain Restriction
+            if (!email.endsWith('@ietdavv.edu.in')) {
+                showMessage("Access Denied: Please use your official @ietdavv.edu.in account.");
+                return;
+            }
+
+            // Check email-to-name mapping (set by admin)
+            const emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+            let nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            // Use admin-set name if available
+            if (emailToNameMap[email]) {
+                nameFromEmail = emailToNameMap[email];
+            }
+
+            // Check if user already exists
+            let existingUser = null;
+            for (let username in registeredUsers) {
+                if (registeredUsers[username].email === email) {
+                    existingUser = { username, ...registeredUsers[username] };
+                    // Update name if admin has set it
+                    if (emailToNameMap[email] && emailToNameMap[email] !== existingUser.name) {
+                        existingUser.name = emailToNameMap[email];
+                        registeredUsers[username].name = emailToNameMap[email];
+                        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                    }
+                    break;
+                }
+            }
+
+            if (existingUser) {
+                loggedInUser = existingUser;
+                saveSession(loggedInUser);
+                toggleMainApp(true);
+                populateProfileData();
+                updateDashboardProfile();
+                showMessage("Welcome back, " + existingUser.name + "!");
+                hideManualEmailInput();
+            } else {
+                // NEW USER - Check if student is added by admin
+                // Find admin-added student by email or name and get their key
+                let adminAddedKey = null;
+                let adminUser = null;
+                
+                for (const key in registeredUsers) {
+                    const user = registeredUsers[key];
+                    if (user.role === 'student') {
+                        // Check by email first
+                        if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
+                            adminAddedKey = key;
+                            adminUser = user;
+                            break;
+                        }
+                        // Check by name if email not found
+                        if (user.name && user.name.toLowerCase() === nameFromEmail.toLowerCase()) {
+                            adminAddedKey = key;
+                            adminUser = user;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!adminAddedKey || !adminUser) {
+                    showMessage("Not allowed. Contact admin.");
+                    hideManualEmailInput();
+                    return;
+                }
+                
+                // Update existing admin-added user entry with email if not present
+                if (!adminUser.email) {
+                    adminUser.email = email;
+                }
+                adminUser.username = adminAddedKey;
+                
+                registeredUsers[adminAddedKey] = adminUser;
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+
+                loggedInUser = { username: adminAddedKey, ...adminUser };
+                saveSession(loggedInUser);
+                toggleMainApp(true);
+                populateProfileData();
+                updateDashboardProfile();
+                showMessage("Welcome, " + adminUser.name + "! Please register face ID during attendance.");
+                hideManualEmailInput();
             }
         };
 
@@ -2464,15 +2915,29 @@
                             }
 
                             const regData = window.pendingRegData || {};
+                            // Update existing admin-added user entry instead of creating new one
+                            const existingUser = registeredUsers[pendingRegUsername];
                             registeredUsers[pendingRegUsername] = {
+                                ...existingUser, // Preserve existing admin data
                                 descriptor: Array.from(resizedDetections.descriptor),
-                                id: regData.collegeId || (pendingRegUsername + "ID"),
+                                id: regData.collegeId || existingUser?.id || (pendingRegUsername + "ID"),
                                 role: 'student',
-                                name: regData.fullname || pendingRegUsername,
-                                email: regData.email || '',
-                                course: regData.course || '',
-                                studentClass: regData.studentClass || ''
+                                name: regData.fullname || existingUser?.name || pendingRegUsername,
+                                email: regData.email || existingUser?.email || '',
+                                course: regData.course || existingUser?.course || '',
+                                studentClass: regData.studentClass || existingUser?.studentClass || '',
+                                batchId: regData.batchId || existingUser?.batchId || ''
                             };
+                            
+                            // If batch is selected, add email to batch
+                            if (regData.batchId && regData.email) {
+                                const batch = batches.find(b => b.id === regData.batchId);
+                                if (batch && !batch.students.includes(regData.email.toLowerCase())) {
+                                    batch.students.push(regData.email.toLowerCase());
+                                    emailToBatchMap[regData.email.toLowerCase()] = regData.batchId;
+                                    saveBatches();
+                                }
+                            }
                             localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
                             showMessage("Identity Verified & Registered!");
 
@@ -2578,31 +3043,94 @@
         // Register button -> Validate profile details and capture face
         if (registerBtn) {
             registerBtn.addEventListener('click', async () => {
-                // Validate all profile fields
+                // Validate all profile fields (these may not exist if using Google OAuth flow)
                 const fullname = document.getElementById('reg-fullname')?.value.trim();
                 const collegeId = document.getElementById('reg-college-id')?.value.trim();
                 const course = document.getElementById('reg-course')?.value.trim();
                 const studentClass = document.getElementById('reg-class')?.value;
                 const email = document.getElementById('reg-email')?.value.trim();
+                const batchId = document.getElementById('reg-batch')?.value;
 
+                // If registration form fields don't exist, try to get from profile
                 if (!fullname || !collegeId || !course || !studentClass) {
-                    showMessage("Please fill all profile details.");
-                    return;
+                    // Try to get from profile if registration form doesn't exist
+                    const profileName = document.getElementById('profile-name')?.value.trim();
+                    const profileId = document.getElementById('profile-id')?.value.trim();
+                    const profileCourse = document.getElementById('profile-course')?.value.trim();
+                    const profileClass = document.getElementById('profile-class')?.value;
+                    const profileEmail = document.getElementById('profile-email')?.value.trim();
+                    const profileBatch = document.getElementById('profile-batch')?.value;
+                    
+                    if (profileName && profileId && profileCourse && profileClass) {
+                        // Check if student is added by admin (by ID) and find their key
+                        let adminAddedKey = null;
+                        for (const key in registeredUsers) {
+                            const user = registeredUsers[key];
+                            if (user.id === profileId && user.role === 'student') {
+                                adminAddedKey = key;
+                                break;
+                            }
+                        }
+                        
+                        if (!adminAddedKey) {
+                            showMessage("Not allowed. Contact admin.");
+                            return;
+                        }
+                        
+                        // Check if already fully registered (has descriptor)
+                        if (registeredUsers[adminAddedKey].descriptor && registeredUsers[adminAddedKey].descriptor.length > 0) {
+                            showMessage("This College ID is already registered.");
+                            return;
+                        }
+                        
+                        // Use profile data for registration
+                        window.pendingRegData = {
+                            fullname: profileName,
+                            collegeId: profileId,
+                            email: profileEmail || loggedInUser?.email || '',
+                            course: profileCourse,
+                            studentClass: profileClass,
+                            batchId: profileBatch || ''
+                        };
+                        pendingRegUsername = adminAddedKey; // Use the admin-added key
+                    } else {
+                        showMessage("Please fill all profile details in the Profile tab first.");
+                        return;
+                    }
+                } else {
+                    // Use registration form data
+                    // Check if student is added by admin (by ID) and find their key
+                    let adminAddedKey = null;
+                    for (const key in registeredUsers) {
+                        const user = registeredUsers[key];
+                        if (user.id === collegeId && user.role === 'student') {
+                            adminAddedKey = key;
+                            break;
+                        }
+                    }
+                    
+                    if (!adminAddedKey) {
+                        showMessage("Not allowed. Contact admin.");
+                        return;
+                    }
+                    
+                    // Check if already fully registered (has descriptor)
+                    if (registeredUsers[adminAddedKey].descriptor && registeredUsers[adminAddedKey].descriptor.length > 0) {
+                        showMessage("This College ID is already registered.");
+                        return;
+                    }
+
+                    // Store pending registration data
+                    pendingRegUsername = adminAddedKey; // Use the admin-added key
+                    window.pendingRegData = {
+                        fullname: fullname,
+                        collegeId: collegeId,
+                        email: email,
+                        course: course,
+                        studentClass: studentClass,
+                        batchId: batchId || ''
+                    };
                 }
-
-                // Check if College ID already exists
-                const idExists = Object.values(registeredUsers).some(u => u.id === collegeId);
-                if (idExists) { showMessage("This College ID is already registered."); return; }
-
-                // Store pending registration data
-                pendingRegUsername = fullname;
-                window.pendingRegData = {
-                    fullname: fullname,
-                    collegeId: collegeId,
-                    email: email,
-                    course: course,
-                    studentClass: studentClass
-                };
 
                 // Capture Face without liveness (Liveness moved to attendance)
                 livenessMode = 'register';
@@ -2627,15 +3155,7 @@
             const stored = localStorage.getItem('spark_timetable_data');
             if (stored) return JSON.parse(stored);
 
-            // Default demo schedule for testing
-            return [
-                { time: '09:00', startVal: 9, subject: 'Data Structures', teacher: 'Prof. Sharma' },
-                { time: '10:00', startVal: 10, subject: 'Algorithms', teacher: 'Prof. Gupta' },
-                { time: '14:00', startVal: 14, subject: 'Database Systems', teacher: 'Prof. Ali' },
-                { time: '16:00', startVal: 16, subject: 'Machine Learning', teacher: 'Prof. Li' },
-                { time: '22:00', startVal: 22, subject: 'Night Study (Demo)', teacher: 'Self' },
-                { time: '23:00', startVal: 23, subject: 'Late Night Coding', teacher: 'Self' }
-            ];
+            return [];
         };
 
         // Helper: Get Current Active Class
@@ -3732,6 +4252,7 @@
         }
 
         function renderTimetable(data) {
+            if (!timetableBody) return;
             timetableBody.innerHTML = '';
             data.forEach(row => {
                 addTimetableRow(row.time, row.subject, row.teacher);
@@ -3740,6 +4261,10 @@
         }
 
         window.addTimetableRow = function (time = '', subject = '', teacher = '') {
+            if (!timetableBody) {
+                showMessage("Timetable not loaded. Please refresh the page.");
+                return;
+            }
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-gray-800/50 transition-colors group';
             tr.innerHTML = `
@@ -3756,6 +4281,11 @@
         };
 
         window.saveTimetableComp = function (data = null) {
+            if (!timetableBody) {
+                showMessage("Timetable not loaded. Please refresh the page.");
+                return;
+            }
+            
             let saveData = data;
             if (!saveData) {
                 saveData = [];
@@ -3778,31 +4308,230 @@
             }
 
             if (saveData.length > 0) {
-                timetableEmpty.classList.add('hidden');
-                timetableContainer.classList.remove('hidden');
+                if (timetableEmpty) timetableEmpty.classList.add('hidden');
+                if (timetableContainer) timetableContainer.classList.remove('hidden');
             }
         };
 
+        // Convert batch timetable format to display format
+        function convertBatchTimetableToDisplay(batchTimetable) {
+            const scheduleData = [];
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const timeSlots = [];
+            for (let hour = 8; hour <= 18; hour++) {
+                timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+            }
+            
+            // Group by time slot
+            timeSlots.forEach(time => {
+                days.forEach(day => {
+                    const key = `${day}_${time}`;
+                    const value = batchTimetable[key] || '';
+                    if (value) {
+                        // Parse value (format: "Subject/Teacher" or just "Subject")
+                        const parts = value.split('/');
+                        const subject = parts[0] || value;
+                        const teacher = parts[1] || '';
+                        scheduleData.push({ time, subject, teacher });
+                    }
+                });
+            });
+            
+            return scheduleData;
+        }
+
+        // Render week-wise student timetable
+        function renderStudentWeekTimetable(timetable) {
+            const tbody = document.getElementById('student-timetable-body');
+            if (!tbody) return;
+
+            // Always get fresh timetable data from localStorage
+            if (loggedInUser && registeredUsers[loggedInUser.username]) {
+                const userData = registeredUsers[loggedInUser.username];
+                const batchId = userData.batchId;
+                if (batchId) {
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    if (batch && batch.timetable) {
+                        timetable = batch.timetable; // Use fresh data
+                    }
+                }
+            }
+
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            
+            // Get time slots from timetable data (same logic as admin/teacher)
+            const timeSlotsSet = new Set();
+            
+            Object.keys(timetable || {}).forEach(key => {
+                const parts = key.split('_');
+                if (parts.length >= 2 && days.includes(parts[0])) {
+                    if (parts.length === 3 && parts[2] === 'room') {
+                        const time = parts[1];
+                        if (time) timeSlotsSet.add(time);
+                    } else if (parts.length === 2) {
+                        const time = parts[1];
+                        if (time) timeSlotsSet.add(time);
+                    }
+                }
+            });
+
+            // Convert to sorted array (sort by time value)
+            let timeSlots = Array.from(timeSlotsSet).sort((a, b) => {
+                const timeToMinutes = (timeStr) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return (hours || 0) * 60 + (minutes || 0);
+                };
+                return timeToMinutes(a) - timeToMinutes(b);
+            });
+            
+            // If no time slots exist, show default time slots (8 AM to 6 PM) for initial setup
+            if (timeSlots.length === 0) {
+                for (let hour = 8; hour <= 18; hour++) {
+                    timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+                }
+            }
+            
+            // Get current date and time
+            const now = new Date();
+            const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMinute; // Time in minutes
+            
+            // Map JavaScript day (0-6) to our day index (Monday = 0)
+            const dayIndexMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: -1 }; // Sunday = -1 (not in our week)
+            const currentDayIndex = dayIndexMap[currentDay];
+
+            tbody.innerHTML = timeSlots.map(time => {
+                const [hourStr, minuteStr] = time.split(':');
+                const hour = parseInt(hourStr) || 0;
+                const minute = parseInt(minuteStr) || 0;
+                const slotTime = hour * 60 + minute; // Time in minutes
+                
+                return `
+                    <tr>
+                        <td class="p-3 border border-gray-700 text-gray-300 font-semibold bg-gray-800 align-top">${time}</td>
+                        ${days.map((day, dayIdx) => {
+                            const key = `${day}_${time}`;
+                            const roomKey = `${day}_${time}_room`;
+                            const value = timetable[key] || '';
+                            const roomValue = timetable[roomKey] || '';
+                            
+                            // Determine class status
+                            let statusClass = 'bg-gray-700/30'; // Default (completed/past)
+                            let statusText = '';
+                            
+                            if (value) {
+                                // Check if this is today
+                                if (currentDayIndex === dayIdx) {
+                                    // Check if class is current (within this hour)
+                                    if (hour === currentHour) {
+                                        statusClass = 'bg-green-600/40 border-2 border-green-500';
+                                        statusText = '<span class="text-xs text-green-300 font-semibold">Current</span>';
+                                    }
+                                    // Check if class is upcoming today
+                                    else if (hour > currentHour || (hour === currentHour && currentMinute < 30)) {
+                                        statusClass = 'bg-blue-600/40 border-2 border-blue-500';
+                                        statusText = '<span class="text-xs text-blue-300 font-semibold">Upcoming</span>';
+                                    }
+                                }
+                                // Check if this is a future day
+                                else if (currentDayIndex !== -1 && dayIdx > currentDayIndex) {
+                                    statusClass = 'bg-blue-600/40 border-2 border-blue-500';
+                                    statusText = '<span class="text-xs text-blue-300 font-semibold">Upcoming</span>';
+                                }
+                                // If it's Sunday and we're showing Monday-Saturday, all are upcoming
+                                else if (currentDayIndex === -1) {
+                                    statusClass = 'bg-blue-600/40 border-2 border-blue-500';
+                                    statusText = '<span class="text-xs text-blue-300 font-semibold">Upcoming</span>';
+                                }
+                            }
+                            
+                            return `
+                                <td class="p-2 border border-gray-700 align-top ${statusClass}">
+                                    ${value ? `
+                                        <div class="space-y-1">
+                                            <div class="font-medium text-white text-sm">${escapeHtml(value)}</div>
+                                            ${roomValue ? `<div class="text-xs text-gray-400">Room: ${escapeHtml(roomValue)}</div>` : ''}
+                                            ${statusText}
+                                        </div>
+                                    ` : '<div class="text-gray-600 text-sm">-</div>'}
+                                </td>
+                            `;
+                        }).join('')}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update real-time clock
+        function updateTimetableClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            const dateEl = document.getElementById('timetable-current-date');
+            const timeEl = document.getElementById('timetable-current-time');
+            
+            if (dateEl) dateEl.textContent = dateStr;
+            if (timeEl) timeEl.textContent = timeStr;
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Start clock update interval
+        setInterval(updateTimetableClock, 1000);
+        updateTimetableClock();
+        
+        // Auto-refresh timetable status every minute
+        setInterval(() => {
+            if (loggedInUser && registeredUsers[loggedInUser.username]) {
+                const userData = registeredUsers[loggedInUser.username];
+                const batchId = userData.batchId;
+                if (batchId) {
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    if (batch && batch.timetable && document.getElementById('student-timetable-body')) {
+                        renderStudentWeekTimetable(batch.timetable);
+                    }
+                }
+            }
+        }, 60000); // Refresh every minute
+
         function loadCompTimetable() {
-            if (!loggedInUser) return;
-            const key = getTimetableKey();
-            const stored = localStorage.getItem(key);
-            if (stored) {
-                try {
-                    const data = JSON.parse(stored);
-                    if (Array.isArray(data) && data.length > 0) {
+            // Load batch-based timetable for student - always get fresh data from localStorage
+            if (loggedInUser && registeredUsers[loggedInUser.username]) {
+                // Refresh user data from localStorage to get latest batchId
+                const allUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+                const userData = allUsers[loggedInUser.username] || registeredUsers[loggedInUser.username];
+                const batchId = userData.batchId;
+                
+                if (batchId) {
+                    // Always get fresh batches data from localStorage
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    
+                    if (batch && batch.timetable && Object.keys(batch.timetable).length > 0) {
+                        renderStudentWeekTimetable(batch.timetable);
                         timetableEmpty.classList.add('hidden');
                         timetableContainer.classList.remove('hidden');
-                        renderTimetable(data);
-                    } else {
-                        timetableEmpty.classList.remove('hidden');
-                        timetableContainer.classList.add('hidden');
+                        updateTimetableClock();
+                        return;
                     }
-                } catch (e) { console.error(e); }
-            } else {
-                timetableEmpty.classList.remove('hidden');
-                timetableContainer.classList.add('hidden');
+                }
             }
+            
+            // Show empty state if no timetable
+            timetableEmpty.classList.remove('hidden');
+            timetableContainer.classList.add('hidden');
         }
 
         // ===== Dashboard Tab Functionality =====
@@ -3838,6 +4567,11 @@
                     }
                     currentTab = tabId;
                     localStorage.setItem('spark_current_tab', currentTab); // Save tab state
+                    
+                    // Load timetable when timetable tab is opened
+                    if (tabId === 'timetable') {
+                        loadCompTimetable();
+                    }
                 }
 
                 // Deactivate all tabs
@@ -3873,6 +4607,11 @@
                 // Show selected tab content
                 const targetContent = document.getElementById(tabId);
                 if (targetContent) targetContent.classList.add('active');
+
+                // Load timetable when timetable tab is opened
+                if (tabId === 'timetable') {
+                    loadCompTimetable();
+                }
 
                 if (tabId === 'attendance' && loggedInUser) {
                     startVideo(videoAttendance, canvasAttendance, 'attendance');
@@ -3940,6 +4679,7 @@
                     checkAttendanceLock();
                     loadCompTimetable();
                     populateProfileData();
+                    updateDashboardProfile();
 
                 } catch (e) {
                     console.error("Session restore failed", e);
@@ -3989,13 +4729,292 @@
                 'profile-id': userData.id || '',
                 'profile-email': userData.email || '',
                 'profile-course': userData.course || '',
-                'profile-class': userData.studentClass || ''
+                'profile-batch': userData.batchId || '',
+                'profile-goals': userData.goals || ''
             };
 
             for (const [id, val] of Object.entries(fields)) {
                 const el = document.getElementById(id);
                 if (el) el.value = val;
             }
+            
+            // Populate batch dropdown
+            populateStudentBatchDropdown();
+            
+            // Load profile photo
+            loadProfilePhoto();
+            
+            // Load skills
+            loadSkills();
+        };
+        
+        // ===== SKILLS MANAGEMENT =====
+        
+        // Load skills from user data
+        function loadSkills() {
+            if (!loggedInUser) return;
+            const userData = registeredUsers[loggedInUser.username] || {};
+            let skills = userData.skills;
+            
+            // Initialize default skills if none exist
+            if (!skills || skills.length === 0) {
+                skills = [];
+                userData.skills = skills;
+                registeredUsers[loggedInUser.username] = userData;
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            }
+            
+            const container = document.getElementById('skills-container');
+            if (!container) return;
+            
+            container.innerHTML = skills.map((skill, index) => `
+                <span class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    ${skill}
+                    <button onclick="removeSkill(${index})" class="text-blue-300 hover:text-red-300 text-xs">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </span>
+            `).join('');
+        }
+        
+        // Add new skill
+        window.addSkill = function () {
+            const input = document.getElementById('new-skill-input');
+            if (!input || !loggedInUser) return;
+            
+            const skill = input.value.trim();
+            if (!skill) {
+                showMessage("Please enter a skill");
+                return;
+            }
+            
+            const userData = registeredUsers[loggedInUser.username] || {};
+            if (!userData.skills) userData.skills = [];
+            
+            if (userData.skills.includes(skill)) {
+                showMessage("Skill already added");
+                return;
+            }
+            
+            userData.skills.push(skill);
+            registeredUsers[loggedInUser.username] = userData;
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            
+            input.value = '';
+            loadSkills();
+            showMessage("Skill added successfully");
+        };
+        
+        // Remove skill
+        window.removeSkill = function (index) {
+            if (!loggedInUser) return;
+            
+            const userData = registeredUsers[loggedInUser.username] || {};
+            if (!userData.skills) return;
+            
+            userData.skills.splice(index, 1);
+            registeredUsers[loggedInUser.username] = userData;
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            
+            loadSkills();
+            showMessage("Skill removed");
+        };
+        
+        // ===== PROFILE PHOTO MANAGEMENT =====
+        
+        // Handle profile photo change
+        window.handleProfilePhotoChange = function (event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showMessage("Please select an image file");
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoData = e.target.result;
+                
+                // Update profile photo display
+                const profileImg = document.getElementById('profile-photo-img');
+                if (profileImg) profileImg.src = photoData;
+                
+                // Update dashboard photo
+                const dashboardImg = document.getElementById('dashboard-profile-photo');
+                if (dashboardImg) dashboardImg.src = photoData;
+                
+                // Save to user data
+                if (loggedInUser && registeredUsers[loggedInUser.username]) {
+                    registeredUsers[loggedInUser.username].profilePhoto = photoData;
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                    showMessage("Profile photo updated successfully");
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        // Load profile photo
+        function loadProfilePhoto() {
+            if (!loggedInUser) return;
+            const userData = registeredUsers[loggedInUser.username] || {};
+            const photoData = userData.profilePhoto;
+            
+            if (photoData) {
+                const profileImg = document.getElementById('profile-photo-img');
+                if (profileImg) profileImg.src = photoData;
+                
+                const dashboardImg = document.getElementById('dashboard-profile-photo');
+                if (dashboardImg) dashboardImg.src = photoData;
+            }
+        };
+        
+        // ===== DASHBOARD PROFILE UPDATE =====
+        
+        // Update dashboard with profile info
+        function updateDashboardProfile() {
+            if (!loggedInUser) return;
+            const userData = registeredUsers[loggedInUser.username] || {};
+            
+            // Check email-to-name mapping (admin may have updated it)
+            const emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+            let displayName = userData.name || loggedInUser.username;
+            if (userData.email && emailToNameMap[userData.email]) {
+                displayName = emailToNameMap[userData.email];
+                // Update userData if name changed
+                if (userData.name !== displayName) {
+                    userData.name = displayName;
+                    registeredUsers[loggedInUser.username] = userData;
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                    loggedInUser.name = displayName;
+                    saveSession(loggedInUser);
+                }
+            }
+            
+            // Update name
+            const bannerUser = document.querySelector('.banner-username');
+            if (bannerUser) bannerUser.textContent = displayName;
+            
+            // Update sidebar name
+            const sidebarName = document.getElementById('sidebar-username');
+            if (sidebarName) sidebarName.textContent = displayName;
+            
+            // Update sidebar ID
+            const sidebarId = document.getElementById('sidebar-id');
+            if (sidebarId) sidebarId.textContent = userData.id || loggedInUser.id || 'N/A';
+            
+            // Update batch info
+            const batchInfo = document.getElementById('dashboard-batch-info');
+            if (batchInfo) {
+                if (userData.batchId) {
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === userData.batchId);
+                    if (batch) {
+                        batchInfo.textContent = `Batch: ${batch.name}`;
+                    } else {
+                        batchInfo.textContent = 'Batch: Not selected';
+                    }
+                } else {
+                    batchInfo.textContent = 'Batch: Not selected';
+                }
+            }
+            
+            // Update sidebar batch
+            const sidebarBatch = document.getElementById('sidebar-batch');
+            if (sidebarBatch) {
+                if (userData.batchId) {
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === userData.batchId);
+                    if (batch) {
+                        sidebarBatch.textContent = `Batch: ${batch.name}`;
+                    } else {
+                        sidebarBatch.textContent = 'Batch: -';
+                    }
+                } else {
+                    sidebarBatch.textContent = 'Batch: -';
+                }
+            }
+            
+            // Update sidebar photo
+            const sidebarImg = document.getElementById('sidebar-profile-photo');
+            if (sidebarImg && userData.profilePhoto) {
+                sidebarImg.src = userData.profilePhoto;
+            }
+            
+            // Update navbar photo
+            const navImg = document.getElementById('nav-profile-photo');
+            if (navImg && userData.profilePhoto) {
+                navImg.src = userData.profilePhoto;
+            }
+        };
+        
+        // Populate student batch dropdown
+        function populateStudentBatchDropdown() {
+            const batchSelect = document.getElementById('profile-batch');
+            if (!batchSelect) return;
+            
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const userData = loggedInUser ? registeredUsers[loggedInUser.username] : {};
+            const currentBatchId = userData.batchId || '';
+            
+            batchSelect.innerHTML = '<option value="">Select your batch</option>';
+            batches.forEach(batch => {
+                const option = document.createElement('option');
+                option.value = batch.id;
+                option.textContent = batch.name;
+                if (batch.id === currentBatchId) option.selected = true;
+                batchSelect.appendChild(option);
+            });
+        }
+        
+        // Update student batch
+        window.updateStudentBatch = function () {
+            if (!loggedInUser) return;
+            const batchSelect = document.getElementById('profile-batch');
+            const emailInput = document.getElementById('profile-email');
+            
+            if (!batchSelect || !emailInput) return;
+            
+            const batchId = batchSelect.value;
+            const email = emailInput.value.trim().toLowerCase();
+            
+            if (!email || !email.includes('@')) {
+                showMessage("Please enter a valid email address first");
+                return;
+            }
+            
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const emailToBatchMap = JSON.parse(localStorage.getItem('spark_email_batch_map') || '{}');
+            
+            // Remove from old batch if exists
+            if (emailToBatchMap[email] && emailToBatchMap[email] !== batchId) {
+                const oldBatch = batches.find(b => b.id === emailToBatchMap[email]);
+                if (oldBatch) {
+                    oldBatch.students = oldBatch.students.filter(e => e !== email);
+                }
+            }
+            
+            // Add to new batch
+            if (batchId) {
+                const batch = batches.find(b => b.id === batchId);
+                if (batch && !batch.students.includes(email)) {
+                    batch.students.push(email);
+                    emailToBatchMap[email] = batchId;
+                }
+            } else {
+                delete emailToBatchMap[email];
+            }
+            
+            // Update user data
+            if (registeredUsers[loggedInUser.username]) {
+                registeredUsers[loggedInUser.username].batchId = batchId;
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            }
+            
+            localStorage.setItem('spark_batches', JSON.stringify(batches));
+            localStorage.setItem('spark_email_batch_map', JSON.stringify(emailToBatchMap));
+            
+            showMessage("Batch updated successfully");
         };
 
         // Save Profile Logic
@@ -4004,13 +5023,33 @@
             saveProfileBtn.onclick = () => {
                 if (!loggedInUser) return;
 
+                const userData = registeredUsers[loggedInUser.username] || {};
                 const updatedData = {
+                    ...userData,
                     name: document.getElementById('profile-name').value,
                     id: document.getElementById('profile-id').value,
                     email: document.getElementById('profile-email').value,
                     course: document.getElementById('profile-course').value,
-                    studentClass: document.getElementById('profile-class').value
+                    batchId: document.getElementById('profile-batch').value,
+                    goals: document.getElementById('profile-goals')?.value || '',
+                    skills: userData.skills || [],
+                    profilePhoto: userData.profilePhoto || ''
                 };
+                
+                // Update batch assignment if email changed
+                const oldEmail = userData.email;
+                const newEmail = updatedData.email.toLowerCase();
+                if (oldEmail && oldEmail !== newEmail && updatedData.batchId) {
+                    updateStudentBatch();
+                }
+                
+                registeredUsers[loggedInUser.username] = updatedData;
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                
+                // Update dashboard
+                updateDashboardProfile();
+                
+                showMessage("Profile saved successfully!");
 
                 registeredUsers[loggedInUser.username] = {
                     ...registeredUsers[loggedInUser.username],
@@ -4385,11 +5424,17 @@
         window.adminAddUserManual = function () {
             const name = document.getElementById('admin-add-name').value;
             const id = document.getElementById('admin-add-id').value;
+            const email = document.getElementById('admin-add-email').value.trim();
             const role = document.getElementById('admin-add-role').value;
 
             if (!name || !id) { showMessage("Please enter Name and ID"); return; }
 
-            if (registeredUsers[name] || registeredUsers[id]) {
+            // Check if user already exists by name, id, or email
+            const existingByName = registeredUsers[name];
+            const existingById = Object.values(registeredUsers).find(u => u.id === id);
+            const existingByEmail = email ? Object.values(registeredUsers).find(u => u.email && u.email.toLowerCase() === email.toLowerCase()) : null;
+            
+            if (existingByName || existingById || existingByEmail) {
                 showMessage("User already exists!");
                 return;
             }
@@ -4398,13 +5443,15 @@
                 descriptor: [],
                 id: id,
                 role: role,
-                name: name
+                name: name,
+                email: email || undefined
             };
             localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
             showMessage(`User ${name} added successfully!`);
 
             document.getElementById('admin-add-name').value = '';
             document.getElementById('admin-add-id').value = '';
+            document.getElementById('admin-add-email').value = '';
         };
 
         window.handleAdminFileUpload = function (input) {
@@ -4451,6 +5498,7 @@
                                 <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-gray-700 border border-gray-600 uppercase">${role}</span></td>
                                 <td class="p-4 text-right">
                                     <button class="text-blue-400 hover:text-blue-300 mr-2" onclick="alert('Edit implementation pending')"><i class="fas fa-edit"></i></button>
+                                    <button class="text-red-400 hover:text-red-300" onclick="adminRemoveUser('${key}')" title="Delete"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -4520,6 +5568,1398 @@
                 });
             }
         };
+
+        // ===== BATCH MANAGEMENT FUNCTIONS =====
+        
+        // Initialize batches data structure
+        let batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+        let emailToBatchMap = JSON.parse(localStorage.getItem('spark_email_batch_map') || '{}');
+        let emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+
+        // Save batches to localStorage
+        function saveBatches() {
+            localStorage.setItem('spark_batches', JSON.stringify(batches));
+            localStorage.setItem('spark_email_batch_map', JSON.stringify(emailToBatchMap));
+            localStorage.setItem('spark_email_name_map', JSON.stringify(emailToNameMap));
+        }
+
+        // Show batch section
+        window.showBatchSection = function (section) {
+            document.querySelectorAll('.batch-sub-content').forEach(c => c.classList.add('hidden'));
+            const target = document.getElementById('batch-sub-' + section);
+            if (target) {
+                target.classList.remove('hidden');
+                if (section === 'view') {
+                    renderBatchesList();
+                } else if (section === 'add-student' || section === 'add-teacher') {
+                    populateBatchSelects();
+                }
+            }
+            
+            // Update tab button states
+            document.querySelectorAll('.sub-tab-btn').forEach(b => {
+                b.classList.remove('text-blue-400', 'text-green-300', 'text-yellow-300', 'border-b-2', 'border-blue-400', 'border-green-400', 'border-yellow-400');
+                b.classList.add('text-gray-400');
+            });
+            const activeBtn = document.querySelector(`[data-sub="${section}"]`);
+            if (activeBtn) {
+                // Remove all active states first
+                activeBtn.classList.remove('text-gray-400');
+                
+                // Add appropriate classes based on section
+                if (section === 'create') {
+                    activeBtn.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
+                } else if (section === 'add-student') {
+                    activeBtn.classList.add('text-green-300', 'border-b-2', 'border-green-400');
+                } else if (section === 'add-teacher') {
+                    activeBtn.classList.add('text-yellow-300', 'border-b-2', 'border-yellow-400');
+                } else {
+                    activeBtn.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
+                }
+            }
+        };
+
+        // Create new batch
+        window.createBatch = function () {
+            const name = document.getElementById('batch-name').value.trim();
+            const description = document.getElementById('batch-description').value.trim();
+
+            if (!name) {
+                showMessage("Please enter a batch name");
+                return;
+            }
+
+            // Check if batch name already exists
+            if (batches.find(b => b.name.toLowerCase() === name.toLowerCase())) {
+                showMessage("Batch name already exists!");
+                return;
+            }
+
+            const newBatch = {
+                id: 'batch_' + Date.now(),
+                name: name,
+                description: description,
+                students: [],
+                teachers: [],
+                timetable: {}
+            };
+
+            batches.push(newBatch);
+            saveBatches();
+            showMessage(`Batch "${name}" created successfully!`);
+            
+            document.getElementById('batch-name').value = '';
+            document.getElementById('batch-description').value = '';
+            
+            populateBatchSelects();
+            renderBatchesList();
+        };
+
+        // Populate batch select dropdowns
+        function populateBatchSelects() {
+            const studentSelect = document.getElementById('batch-select-student');
+            const teacherSelect = document.getElementById('batch-select-teacher');
+            const scheduleSelect = document.getElementById('schedule-batch-select');
+
+            const options = batches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            const defaultOption = '<option value="">Select Batch</option>';
+
+            if (studentSelect) studentSelect.innerHTML = defaultOption + options;
+            if (teacherSelect) teacherSelect.innerHTML = defaultOption + options;
+            if (scheduleSelect) scheduleSelect.innerHTML = defaultOption + options;
+        }
+
+        // Add student to batch
+        window.addStudentToBatch = function () {
+            // Refresh batches and maps to get latest data
+            batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            emailToBatchMap = JSON.parse(localStorage.getItem('spark_email_batch_map') || '{}');
+            emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+            
+            const batchId = document.getElementById('batch-select-student').value;
+            const fullName = document.getElementById('student-full-name').value.trim();
+            const email = document.getElementById('student-email').value.trim().toLowerCase();
+            const statusDiv = document.getElementById('student-email-status');
+
+            if (!batchId) {
+                showMessage("Please select a batch");
+                return;
+            }
+
+            if (!fullName) {
+                showMessage("Please enter student's full name");
+                return;
+            }
+
+            if (!email || !email.includes('@')) {
+                showMessage("Please enter a valid email address");
+                return;
+            }
+
+            // Check if email is already in another batch
+            if (emailToBatchMap[email] && emailToBatchMap[email] !== batchId) {
+                const existingBatch = batches.find(b => b.id === emailToBatchMap[email]);
+                showMessage(`This email is already assigned to batch: ${existingBatch ? existingBatch.name : 'Unknown'}`);
+                if (statusDiv) {
+                    statusDiv.textContent = `Email already in batch: ${existingBatch ? existingBatch.name : 'Unknown'}`;
+                    statusDiv.className = 'text-sm text-red-400';
+                }
+                return;
+            }
+
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            // Check if email already in this batch
+            if (batch.students.includes(email)) {
+                showMessage("Student already in this batch");
+                if (statusDiv) {
+                    statusDiv.textContent = 'Student already in this batch';
+                    statusDiv.className = 'text-sm text-yellow-400';
+                }
+                return;
+            }
+
+            batch.students.push(email);
+            emailToBatchMap[email] = batchId;
+            emailToNameMap[email] = fullName;
+            
+            // Update user data if user exists
+            for (let username in registeredUsers) {
+                if (registeredUsers[username].email === email) {
+                    registeredUsers[username].name = fullName;
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                    break;
+                }
+            }
+            
+            saveBatches();
+            showMessage(`Student ${fullName} (${email}) added to batch ${batch.name}`);
+            
+            document.getElementById('student-full-name').value = '';
+            document.getElementById('student-email').value = '';
+            if (statusDiv) {
+                statusDiv.textContent = '';
+                statusDiv.className = 'text-sm text-gray-400';
+            }
+            
+            renderBatchesList();
+        };
+
+        // Add teacher to batch
+        window.addTeacherToBatch = function () {
+            const batchId = document.getElementById('batch-select-teacher').value;
+            const email = document.getElementById('teacher-email').value.trim().toLowerCase();
+
+            if (!batchId) {
+                showMessage("Please select a batch");
+                return;
+            }
+
+            if (!email || !email.includes('@')) {
+                showMessage("Please enter a valid email address");
+                return;
+            }
+
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            // Check if email already in this batch
+            if (batch.teachers.includes(email)) {
+                showMessage("Teacher already in this batch");
+                return;
+            }
+
+            batch.teachers.push(email);
+            saveBatches();
+            showMessage(`Teacher ${email} added to batch ${batch.name}`);
+            
+            document.getElementById('teacher-email').value = '';
+            renderBatchesList();
+        };
+
+        // Render batches list
+        function renderBatchesList() {
+            const container = document.getElementById('batches-list');
+            if (!container) return;
+
+            if (batches.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">No batches created yet</div>';
+                return;
+            }
+
+            container.innerHTML = batches.map(batch => `
+                <div class="bg-gray-700/50 p-6 rounded-xl border border-gray-600">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-1">${batch.name}</h3>
+                            ${batch.description ? `<p class="text-gray-400 text-sm">${batch.description}</p>` : ''}
+                        </div>
+                        <button onclick="deleteBatch('${batch.id}')" 
+                            class="text-red-400 hover:text-red-300 p-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-300 mb-2">Students (${batch.students.length})</h4>
+                            <div class="space-y-1 max-h-32 overflow-y-auto">
+                                ${batch.students.length > 0 ? 
+                                    batch.students.map(email => `
+                                        <div class="text-sm text-gray-400 flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                                            <span>${email}</span>
+                                            <button onclick="removeStudentFromBatch('${batch.id}', '${email}')" 
+                                                class="text-red-400 hover:text-red-300 text-xs">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    `).join('') : 
+                                    '<div class="text-sm text-gray-500">No students added</div>'
+                                }
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-300 mb-2">Teachers (${batch.teachers.length})</h4>
+                            <div class="space-y-1 max-h-32 overflow-y-auto">
+                                ${batch.teachers.length > 0 ? 
+                                    batch.teachers.map(email => `
+                                        <div class="text-sm text-gray-400 flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                                            <span>${email}</span>
+                                            <button onclick="removeTeacherFromBatch('${batch.id}', '${email}')" 
+                                                class="text-red-400 hover:text-red-300 text-xs">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    `).join('') : 
+                                    '<div class="text-sm text-gray-500">No teachers added</div>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Remove student from batch
+        window.removeStudentFromBatch = function (batchId, email) {
+            if (!confirm(`Remove ${email} from this batch?`)) return;
+            
+            const batch = batches.find(b => b.id === batchId);
+            if (batch) {
+                batch.students = batch.students.filter(e => e !== email);
+                delete emailToBatchMap[email];
+                saveBatches();
+                renderBatchesList();
+                showMessage("Student removed from batch");
+            }
+        };
+
+        // Remove teacher from batch
+        window.removeTeacherFromBatch = function (batchId, email) {
+            if (!confirm(`Remove ${email} from this batch?`)) return;
+            
+            const batch = batches.find(b => b.id === batchId);
+            if (batch) {
+                batch.teachers = batch.teachers.filter(e => e !== email);
+                saveBatches();
+                renderBatchesList();
+                showMessage("Teacher removed from batch");
+            }
+        };
+
+        // Delete batch
+        window.deleteBatch = function (batchId) {
+            if (!confirm("Are you sure you want to delete this batch? All students and teachers will be removed.")) return;
+            
+            const batch = batches.find(b => b.id === batchId);
+            if (batch) {
+                // Remove all student emails from map
+                batch.students.forEach(email => {
+                    delete emailToBatchMap[email];
+                });
+                
+                batches = batches.filter(b => b.id !== batchId);
+                saveBatches();
+                renderBatchesList();
+                populateBatchSelects();
+                showMessage("Batch deleted");
+            }
+        };
+
+        // ===== SCHEDULE/TIMETABLE FUNCTIONS =====
+
+        // Load batch schedule
+        window.loadBatchSchedule = function () {
+            const batchId = document.getElementById('schedule-batch-select').value;
+            const container = document.getElementById('schedule-container');
+            const empty = document.getElementById('schedule-empty');
+
+            if (!batchId) {
+                if (container) container.classList.add('hidden');
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+
+            // Refresh batches to get latest data
+            batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) return;
+
+            if (container) container.classList.remove('hidden');
+            if (empty) empty.classList.add('hidden');
+
+            // Initialize timetable if not exists
+            if (!batch.timetable || Object.keys(batch.timetable).length === 0) {
+                batch.timetable = {};
+                saveBatches();
+            }
+
+            renderScheduleGrid(batch.timetable);
+        };
+
+        // Render schedule grid
+        function renderScheduleGrid(timetable) {
+            const tbody = document.getElementById('schedule-tbody');
+            if (!tbody) return;
+
+            // Refresh batches from localStorage to ensure we have latest data
+            batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            
+            // Get all time slots that exist in the timetable (either with data or empty)
+            const timeSlotsSet = new Set();
+            
+            Object.keys(timetable || {}).forEach(key => {
+                // Keys are in format: "monday_09:00" or "monday_09:00_room"
+                const parts = key.split('_');
+                if (parts.length >= 2 && days.includes(parts[0])) {
+                    // For room keys: "monday_09:00_room" -> time is parts[1]
+                    // For class keys: "monday_09:00" -> time is parts[1]
+                    if (parts.length === 3 && parts[2] === 'room') {
+                        // Room key - time is in parts[1]
+                        const time = parts[1];
+                        if (time) {
+                            timeSlotsSet.add(time);
+                        }
+                    } else if (parts.length === 2) {
+                        // Class key - time is in parts[1]
+                        const time = parts[1];
+                        if (time) {
+                            timeSlotsSet.add(time);
+                        }
+                    }
+                }
+            });
+
+            // Convert to sorted array (sort by time, not alphabetically)
+            let timeSlots = Array.from(timeSlotsSet).sort((a, b) => {
+                // Convert time strings to minutes for proper sorting
+                const timeToMinutes = (timeStr) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return (hours || 0) * 60 + (minutes || 0);
+                };
+                return timeToMinutes(a) - timeToMinutes(b);
+            });
+            
+            // If no time slots exist, show default time slots (8 AM to 6 PM) for initial setup
+            if (timeSlots.length === 0) {
+                for (let hour = 8; hour <= 18; hour++) {
+                    timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+                }
+            }
+
+            tbody.innerHTML = timeSlots.map((time, timeIndex) => {
+                // Escape time for use in HTML attributes
+                const timeEscaped = time.replace(/'/g, "\\'");
+                return `
+                    <tr data-time="${time}" data-row-index="${timeIndex}">
+                        <td class="p-3 border border-gray-700 text-gray-300 font-semibold bg-gray-800 align-top">${time}</td>
+                        ${days.map(day => {
+                            const key = `${day}_${time}`;
+                            const roomKey = `${day}_${time}_room`;
+                            const value = (timetable[key] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                            const roomValue = (timetable[roomKey] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                            return `
+                                <td class="p-2 border border-gray-700 align-top">
+                                    <div class="space-y-2">
+                                        <input type="text" 
+                                            data-day="${day}" 
+                                            data-time="${time}"
+                                            data-type="class"
+                                            value="${value}"
+                                            placeholder="Subject/Teacher"
+                                            class="w-full p-2 bg-gray-800/50 border border-gray-600 rounded text-white text-sm focus:border-blue-500 outline-none">
+                                        <input type="text" 
+                                            data-day="${day}" 
+                                            data-time="${time}"
+                                            data-type="room"
+                                            value="${roomValue}"
+                                            placeholder="Room No."
+                                            class="w-full p-1.5 bg-gray-800/30 border border-gray-600 rounded text-white text-xs focus:border-blue-500 outline-none">
+                                    </div>
+                                </td>
+                            `;
+                        }).join('')}
+                        <td class="p-2 border border-gray-700 align-top">
+                            <div class="flex gap-2 justify-center">
+                                <button onclick="editTimetableRow('${timeEscaped}')" 
+                                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition flex items-center gap-1"
+                                    title="Edit Row">
+                                    <i class="fas fa-edit text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                                <button onclick="deleteTimetableRow('${timeEscaped}')" 
+                                    class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold transition flex items-center gap-1"
+                                    title="Delete Row">
+                                    <i class="fas fa-trash text-xs"></i>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Add event listeners for real-time updates
+            tbody.querySelectorAll('input[data-type="class"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const day = this.dataset.day;
+                    const time = this.dataset.time;
+                    const key = `${day}_${time}`;
+                    const batchId = document.getElementById('schedule-batch-select').value;
+                    if (!batchId) return;
+                    
+                    // Refresh batches to get latest data
+                    batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    if (batch) {
+                        if (!batch.timetable) batch.timetable = {};
+                        batch.timetable[key] = this.value;
+                        saveBatches();
+                    }
+                });
+            });
+
+            // Add event listeners for room number updates
+            tbody.querySelectorAll('input[data-type="room"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const day = this.dataset.day;
+                    const time = this.dataset.time;
+                    const key = `${day}_${time}_room`;
+                    const batchId = document.getElementById('schedule-batch-select').value;
+                    if (!batchId) return;
+                    
+                    // Refresh batches to get latest data
+                    batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    if (batch) {
+                        if (!batch.timetable) batch.timetable = {};
+                        batch.timetable[key] = this.value;
+                        saveBatches();
+                    }
+                });
+            });
+        }
+
+        // Save batch schedule
+        window.saveBatchSchedule = function () {
+            const batchId = document.getElementById('schedule-batch-select').value;
+            if (!batchId) {
+                showMessage("Please select a batch");
+                return;
+            }
+
+            // Refresh batches to get latest data
+            batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            if (!batch.timetable) batch.timetable = {};
+
+            // Collect all input values (both class and room)
+            const inputs = document.querySelectorAll('#schedule-tbody input');
+            inputs.forEach(input => {
+                const day = input.dataset.day;
+                const time = input.dataset.time;
+                const type = input.dataset.type || 'class';
+                const key = type === 'room' ? `${day}_${time}_room` : `${day}_${time}`;
+                batch.timetable[key] = input.value.trim();
+            });
+
+            saveBatches();
+            showMessage(`Schedule saved for ${batch.name}`);
+        };
+
+        // Edit timetable row - focuses on the first input of the row
+        window.editTimetableRow = function (time) {
+            const row = document.querySelector(`#schedule-tbody tr[data-time="${time}"]`);
+            if (!row) return;
+            
+            const firstInput = row.querySelector('input[data-type="class"]');
+            if (firstInput) {
+                firstInput.focus();
+                firstInput.select();
+            }
+        };
+
+        // Delete timetable row - removes all data for that time slot and removes the row
+        window.deleteTimetableRow = function (time) {
+            if (!confirm(`Are you sure you want to delete all classes for time slot ${time}? This will remove the entire row.`)) {
+                return;
+            }
+
+            const batchId = document.getElementById('schedule-batch-select').value;
+            if (!batchId) {
+                showMessage("Please select a batch");
+                return;
+            }
+
+            // Refresh batches to get latest data
+            batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            if (!batch.timetable) batch.timetable = {};
+
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            
+            // Remove all entries for this time slot
+            days.forEach(day => {
+                const classKey = `${day}_${time}`;
+                const roomKey = `${day}_${time}_room`;
+                delete batch.timetable[classKey];
+                delete batch.timetable[roomKey];
+            });
+
+            saveBatches();
+            
+            // Remove the row from DOM immediately (escape time for querySelector)
+            const escapedTime = time.replace(/"/g, '\\"').replace(/'/g, "\\'");
+            const row = document.querySelector(`#schedule-tbody tr[data-time="${escapedTime}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // Also reload the schedule grid to ensure consistency
+            renderScheduleGrid(batch.timetable);
+
+            showMessage(`Time slot ${time} deleted successfully`);
+        };
+
+        // Add new time slot
+        window.addNewTimeSlot = function () {
+            const batchId = document.getElementById('schedule-batch-select').value;
+            if (!batchId) {
+                showMessage("Please select a batch first");
+                return;
+            }
+
+            // Prompt for time input
+            const timeInput = prompt("Enter time slot (e.g., 09:30, 14:15):");
+            if (!timeInput || !timeInput.trim()) {
+                return;
+            }
+
+            // Validate time format (HH:MM)
+            const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+            if (!timePattern.test(timeInput.trim())) {
+                showMessage("Invalid time format. Please use HH:MM format (e.g., 09:30)");
+                return;
+            }
+
+            const time = timeInput.trim();
+            
+            // Refresh batches to get latest data
+            batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            if (!batch.timetable) batch.timetable = {};
+
+            // Check if time slot already exists (check if any day has this time slot, even if empty)
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const existingKey = days.find(day => batch.timetable.hasOwnProperty(`${day}_${time}`));
+            if (existingKey) {
+                showMessage("This time slot already exists");
+                return;
+            }
+
+            // Add empty entries for the new time slot (so it appears in the grid)
+            // We don't set values, just ensure the keys exist so the row shows up
+            days.forEach(day => {
+                const classKey = `${day}_${time}`;
+                if (!batch.timetable[classKey]) {
+                    batch.timetable[classKey] = '';
+                }
+            });
+
+            saveBatches();
+            
+            // Reload the schedule grid to show the new row
+            renderScheduleGrid(batch.timetable);
+
+            showMessage(`Time slot ${time} added successfully`);
+        };
+
+        // Initialize batch selects when admin tab is opened
+        document.querySelectorAll('.tab-btn-admin').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                if (tabId === 'admin-batch' || tabId === 'admin-timetable') {
+                    populateBatchSelects();
+                    if (tabId === 'admin-batch') {
+                        renderBatchesList();
+                    }
+                }
+            });
+        });
+
+        // ===== TEACHER BATCH TIMETABLE FUNCTIONS =====
+
+        // Populate teacher batch select
+        function populateTeacherBatchSelect() {
+            const teacherSelect = document.getElementById('teacher-batch-select');
+            if (!teacherSelect) return;
+            
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const options = batches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            teacherSelect.innerHTML = '<option value="">Select Batch</option>' + options;
+        }
+
+        // Load teacher batch schedule
+        window.loadTeacherBatchSchedule = function () {
+            const batchId = document.getElementById('teacher-batch-select').value;
+            const container = document.getElementById('teacher-schedule-container');
+            const empty = document.getElementById('teacher-schedule-empty');
+
+            if (!batchId) {
+                if (container) container.classList.add('hidden');
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+
+            // Always get fresh batches data from localStorage
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) return;
+
+            if (container) container.classList.remove('hidden');
+            if (empty) empty.classList.add('hidden');
+
+            // Initialize timetable if not exists
+            if (!batch.timetable || Object.keys(batch.timetable).length === 0) {
+                batch.timetable = {};
+                localStorage.setItem('spark_batches', JSON.stringify(batches));
+            }
+
+            // Always render with fresh data from localStorage
+            renderTeacherScheduleGrid(batch.timetable, batchId);
+        };
+
+        // Render teacher schedule grid
+        function renderTeacherScheduleGrid(timetable, batchId) {
+            const tbody = document.getElementById('teacher-schedule-tbody');
+            if (!tbody) return;
+
+            // Always get fresh timetable data from localStorage to ensure we have latest changes
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (batch && batch.timetable) {
+                timetable = batch.timetable; // Use fresh data
+            }
+
+            // Get time slots from timetable data (same logic as admin)
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const timeSlotsSet = new Set();
+            
+            Object.keys(timetable || {}).forEach(key => {
+                const parts = key.split('_');
+                if (parts.length >= 2 && days.includes(parts[0])) {
+                    if (parts.length === 3 && parts[2] === 'room') {
+                        const time = parts[1];
+                        if (time) timeSlotsSet.add(time);
+                    } else if (parts.length === 2) {
+                        const time = parts[1];
+                        if (time) timeSlotsSet.add(time);
+                    }
+                }
+            });
+
+            // Convert to sorted array (sort by time value)
+            let timeSlots = Array.from(timeSlotsSet).sort((a, b) => {
+                const timeToMinutes = (timeStr) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return (hours || 0) * 60 + (minutes || 0);
+                };
+                return timeToMinutes(a) - timeToMinutes(b);
+            });
+            
+            // If no time slots exist, show default time slots (8 AM to 6 PM) for initial setup
+            if (timeSlots.length === 0) {
+                for (let hour = 8; hour <= 18; hour++) {
+                    timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+                }
+            }
+
+            tbody.innerHTML = timeSlots.map((time, timeIndex) => {
+                // Escape time for use in HTML attributes
+                const timeEscaped = time.replace(/'/g, "\\'");
+                return `
+                    <tr data-time="${time}" data-row-index="${timeIndex}">
+                        <td class="p-3 border border-gray-700 text-gray-300 font-semibold bg-gray-800 align-top">${time}</td>
+                        ${days.map(day => {
+                            const key = `${day}_${time}`;
+                            const roomKey = `${day}_${time}_room`;
+                            const value = (timetable[key] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                            const roomValue = (timetable[roomKey] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                            return `
+                                <td class="p-2 border border-gray-700 align-top">
+                                    <div class="space-y-2">
+                                        <input type="text" 
+                                            data-day="${day}" 
+                                            data-time="${time}"
+                                            data-type="class"
+                                            data-batch-id="${batchId}"
+                                            value="${value}"
+                                            placeholder="Subject/Teacher"
+                                            class="w-full p-2 bg-gray-800/50 border border-gray-600 rounded text-white text-sm focus:border-green-500 outline-none">
+                                        <input type="text" 
+                                            data-day="${day}" 
+                                            data-time="${time}"
+                                            data-type="room"
+                                            data-batch-id="${batchId}"
+                                            value="${roomValue}"
+                                            placeholder="Room No."
+                                            class="w-full p-1.5 bg-gray-800/30 border border-gray-600 rounded text-white text-xs focus:border-green-500 outline-none">
+                                    </div>
+                                </td>
+                            `;
+                        }).join('')}
+                        <td class="p-2 border border-gray-700 align-top">
+                            <div class="flex gap-2 justify-center">
+                                <button onclick="editTeacherTimetableRow('${timeEscaped}')" 
+                                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition flex items-center gap-1"
+                                    title="Edit Row">
+                                    <i class="fas fa-edit text-xs"></i>
+                                    <span>Edit</span>
+                                </button>
+                                <button onclick="deleteTeacherTimetableRow('${timeEscaped}')" 
+                                    class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold transition flex items-center gap-1"
+                                    title="Delete Row">
+                                    <i class="fas fa-trash text-xs"></i>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Add event listeners for real-time updates (class inputs)
+            tbody.querySelectorAll('input[data-type="class"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const day = this.dataset.day;
+                    const time = this.dataset.time;
+                    const batchId = this.dataset.batchId;
+                    const key = `${day}_${time}`;
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    if (batch) {
+                        if (!batch.timetable) batch.timetable = {};
+                        batch.timetable[key] = this.value;
+                        localStorage.setItem('spark_batches', JSON.stringify(batches));
+                    }
+                });
+            });
+
+            // Add event listeners for room number updates
+            tbody.querySelectorAll('input[data-type="room"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const day = this.dataset.day;
+                    const time = this.dataset.time;
+                    const batchId = this.dataset.batchId;
+                    const key = `${day}_${time}_room`;
+                    const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                    const batch = batches.find(b => b.id === batchId);
+                    if (batch) {
+                        if (!batch.timetable) batch.timetable = {};
+                        batch.timetable[key] = this.value;
+                        localStorage.setItem('spark_batches', JSON.stringify(batches));
+                    }
+                });
+            });
+        }
+
+        // Save teacher batch schedule
+        window.saveTeacherBatchSchedule = function () {
+            const batchId = document.getElementById('teacher-batch-select').value;
+            if (!batchId) {
+                showMessage("Please select a batch");
+                return;
+            }
+
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            if (!batch.timetable) batch.timetable = {};
+
+            // Collect all input values (both class and room)
+            const inputs = document.querySelectorAll('#teacher-schedule-tbody input');
+            inputs.forEach(input => {
+                const day = input.dataset.day;
+                const time = input.dataset.time;
+                const type = input.dataset.type || 'class';
+                const key = type === 'room' ? `${day}_${time}_room` : `${day}_${time}`;
+                batch.timetable[key] = input.value.trim();
+            });
+
+            localStorage.setItem('spark_batches', JSON.stringify(batches));
+            showMessage(`Schedule saved for ${batch.name}`);
+        };
+
+        // Edit teacher timetable row - focuses on the first input of the row
+        window.editTeacherTimetableRow = function (time) {
+            const row = document.querySelector(`#teacher-schedule-tbody tr[data-time="${time}"]`);
+            if (!row) return;
+            
+            const firstInput = row.querySelector('input[data-type="class"]');
+            if (firstInput) {
+                firstInput.focus();
+                firstInput.select();
+            }
+        };
+
+        // Delete teacher timetable row - removes all data for that time slot and removes the row
+        window.deleteTeacherTimetableRow = function (time) {
+            if (!confirm(`Are you sure you want to delete all classes for time slot ${time}? This will remove the entire row.`)) {
+                return;
+            }
+
+            const batchId = document.getElementById('teacher-batch-select').value;
+            if (!batchId) {
+                showMessage("Please select a batch");
+                return;
+            }
+
+            // Refresh batches to get latest data
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            if (!batch.timetable) batch.timetable = {};
+
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            
+            // Remove all entries for this time slot
+            days.forEach(day => {
+                const classKey = `${day}_${time}`;
+                const roomKey = `${day}_${time}_room`;
+                delete batch.timetable[classKey];
+                delete batch.timetable[roomKey];
+            });
+
+            localStorage.setItem('spark_batches', JSON.stringify(batches));
+            
+            // Remove the row from DOM immediately (escape time for querySelector)
+            const escapedTime = time.replace(/"/g, '\\"').replace(/'/g, "\\'");
+            const row = document.querySelector(`#teacher-schedule-tbody tr[data-time="${escapedTime}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // Also reload the schedule grid to ensure consistency
+            renderTeacherScheduleGrid(batch.timetable, batchId);
+
+            showMessage(`Time slot ${time} deleted successfully`);
+        };
+
+        // Add new time slot for teacher
+        window.addNewTeacherTimeSlot = function () {
+            const batchId = document.getElementById('teacher-batch-select').value;
+            if (!batchId) {
+                showMessage("Please select a batch first");
+                return;
+            }
+
+            // Prompt for time input
+            const timeInput = prompt("Enter time slot (e.g., 09:30, 14:15):");
+            if (!timeInput || !timeInput.trim()) {
+                return;
+            }
+
+            // Validate time format (HH:MM)
+            const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+            if (!timePattern.test(timeInput.trim())) {
+                showMessage("Invalid time format. Please use HH:MM format (e.g., 09:30)");
+                return;
+            }
+
+            const time = timeInput.trim();
+            
+            // Refresh batches to get latest data
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            if (!batch.timetable) batch.timetable = {};
+
+            // Check if time slot already exists
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const existingKey = days.find(day => batch.timetable.hasOwnProperty(`${day}_${time}`));
+            if (existingKey) {
+                showMessage("This time slot already exists");
+                return;
+            }
+
+            // Add empty entries for the new time slot (so it appears in the grid)
+            days.forEach(day => {
+                const classKey = `${day}_${time}`;
+                if (!batch.timetable[classKey]) {
+                    batch.timetable[classKey] = '';
+                }
+            });
+
+            localStorage.setItem('spark_batches', JSON.stringify(batches));
+            
+            // Reload the schedule grid to show the new row
+            renderTeacherScheduleGrid(batch.timetable, batchId);
+
+            showMessage(`Time slot ${time} added successfully`);
+        };
+
+        // Initialize teacher batch select when teacher tab is opened
+        document.querySelectorAll('.tab-btn-teacher').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                if (tabId === 'teacher-timetable') {
+                    populateTeacherBatchSelect();
+                    // Reload schedule if batch is already selected
+                    const batchSelect = document.getElementById('teacher-batch-select');
+                    if (batchSelect && batchSelect.value) {
+                        loadTeacherBatchSchedule();
+                    }
+                } else if (tabId === 'teacher-results') {
+                    populateTeacherResultBatchSelect();
+                }
+            });
+        });
+
+        // ===== RESULT MANAGEMENT FUNCTIONS =====
+
+        // Initialize result storage structure
+        function getResultsStorage() {
+            return JSON.parse(localStorage.getItem('spark_results') || '{}');
+        }
+
+        function saveResultsStorage(results) {
+            localStorage.setItem('spark_results', JSON.stringify(results));
+        }
+
+        // Populate teacher result batch select
+        function populateTeacherResultBatchSelect() {
+            const batchSelect = document.getElementById('teacher-result-batch');
+            if (!batchSelect) return;
+            
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            batchSelect.innerHTML = '<option value="">Select a batch</option>';
+            batches.forEach(batch => {
+                const option = document.createElement('option');
+                option.value = batch.id;
+                option.textContent = batch.name;
+                batchSelect.appendChild(option);
+            });
+        }
+
+        // Populate admin result batch select
+        function populateAdminResultBatchSelect() {
+            const batchSelect = document.getElementById('admin-result-batch');
+            if (!batchSelect) return;
+            
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            batchSelect.innerHTML = '<option value="">Select a batch</option>';
+            batches.forEach(batch => {
+                const option = document.createElement('option');
+                option.value = batch.id;
+                option.textContent = batch.name;
+                batchSelect.appendChild(option);
+            });
+        }
+
+        // Load students for result entry (Teacher)
+        window.loadStudentsForResultEntry = function () {
+            const batchId = document.getElementById('teacher-result-batch')?.value;
+            const subject = document.getElementById('teacher-result-subject')?.value.trim();
+            const examType = document.getElementById('teacher-result-exam-type')?.value;
+            const container = document.getElementById('teacher-result-students-container');
+            const empty = document.getElementById('teacher-result-empty');
+            const tbody = document.getElementById('teacher-result-students-tbody');
+
+            if (!batchId) {
+                if (container) container.classList.add('hidden');
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+
+            if (!subject || !examType) {
+                showMessage("Please enter subject and select exam type");
+                return;
+            }
+
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            if (!batch) {
+                showMessage("Batch not found");
+                return;
+            }
+
+            const emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+            
+            // Get existing results for this batch/subject/exam
+            const results = getResultsStorage();
+            const resultKey = `${batchId}_${subject}_${examType}`;
+            const existingResults = results[resultKey] || {};
+
+            // Build student list
+            let html = '';
+            let rollNo = 1;
+            
+            batch.students.forEach(email => {
+                const userData = Object.values(registeredUsers).find(u => u.email?.toLowerCase() === email.toLowerCase());
+                const studentName = userData?.name || emailToNameMap[email] || email.split('@')[0];
+                const studentId = userData?.id || `STU-${rollNo}`;
+                const existingMark = existingResults[email] || '';
+
+                html += `
+                    <tr class="hover:bg-gray-700/30 transition">
+                        <td class="p-3 border border-gray-700 text-gray-300 font-mono">${studentId}</td>
+                        <td class="p-3 border border-gray-700 text-white">${studentName}</td>
+                        <td class="p-3 border border-gray-700 text-gray-400 text-sm">${email}</td>
+                        <td class="p-3 border border-gray-700">
+                            <input type="number" 
+                                data-email="${email}"
+                                min="0" 
+                                max="100" 
+                                step="0.01"
+                                value="${existingMark}"
+                                placeholder="Enter marks"
+                                class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:border-green-500 outline-none">
+                        </td>
+                    </tr>
+                `;
+                rollNo++;
+            });
+
+            if (tbody) tbody.innerHTML = html;
+            if (container) container.classList.remove('hidden');
+            if (empty) empty.classList.add('hidden');
+        };
+
+        // Save student results (Teacher)
+        window.saveStudentResults = function () {
+            const batchId = document.getElementById('teacher-result-batch')?.value;
+            const subject = document.getElementById('teacher-result-subject')?.value.trim();
+            const examType = document.getElementById('teacher-result-exam-type')?.value;
+
+            if (!batchId || !subject || !examType) {
+                showMessage("Please fill in all fields (Batch, Subject, Exam Type)");
+                return;
+            }
+
+            const inputs = document.querySelectorAll('#teacher-result-students-tbody input[data-email]');
+            const results = getResultsStorage();
+            const resultKey = `${batchId}_${subject}_${examType}`;
+            
+            if (!results[resultKey]) {
+                results[resultKey] = {};
+            }
+
+            let hasMarks = false;
+            inputs.forEach(input => {
+                const email = input.dataset.email;
+                const marks = input.value.trim();
+                if (marks) {
+                    results[resultKey][email] = parseFloat(marks);
+                    hasMarks = true;
+                } else {
+                    delete results[resultKey][email];
+                }
+            });
+
+            if (!hasMarks) {
+                showMessage("Please enter at least one mark");
+                return;
+            }
+
+            // Add metadata
+            results[resultKey]._metadata = {
+                batchId: batchId,
+                subject: subject,
+                examType: examType,
+                updatedAt: new Date().toISOString(),
+                updatedBy: 'teacher'
+            };
+
+            saveResultsStorage(results);
+            showMessage("Results saved successfully!");
+        };
+
+        // Load student results (Student Portal)
+        function loadStudentResults() {
+            const container = document.getElementById('student-results-container');
+            const empty = document.getElementById('student-results-empty');
+            
+            if (!loggedInUser) {
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+
+            const userData = registeredUsers[loggedInUser.username] || {};
+            const studentEmail = userData.email?.toLowerCase();
+            
+            if (!studentEmail) {
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+
+            const results = getResultsStorage();
+            const studentResults = [];
+
+            // Find all results for this student
+            Object.keys(results).forEach(key => {
+                const resultData = results[key];
+                if (resultData[studentEmail] !== undefined) {
+                    const metadata = resultData._metadata || {};
+                    studentResults.push({
+                        subject: metadata.subject || 'Unknown',
+                        examType: metadata.examType || 'Unknown',
+                        marks: resultData[studentEmail],
+                        batchId: metadata.batchId || '',
+                        updatedAt: metadata.updatedAt || ''
+                    });
+                }
+            });
+
+            if (studentResults.length === 0) {
+                if (empty) empty.classList.remove('hidden');
+                if (container) container.innerHTML = '';
+                return;
+            }
+
+            // Group by subject
+            const groupedBySubject = {};
+            studentResults.forEach(result => {
+                if (!groupedBySubject[result.subject]) {
+                    groupedBySubject[result.subject] = [];
+                }
+                groupedBySubject[result.subject].push(result);
+            });
+
+            // Build HTML
+            let html = '';
+            Object.keys(groupedBySubject).sort().forEach(subject => {
+                html += `
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-700 mb-4">
+                        <h3 class="text-xl font-bold text-white mb-4">${subject}</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-gray-800">
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Exam Type</th>
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Marks</th>
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                groupedBySubject[subject].forEach(result => {
+                    const date = result.updatedAt ? new Date(result.updatedAt).toLocaleDateString() : '-';
+                    html += `
+                        <tr class="hover:bg-gray-700/30">
+                            <td class="p-3 border border-gray-700 text-white">${result.examType}</td>
+                            <td class="p-3 border border-gray-700">
+                                <span class="text-lg font-bold text-blue-400">${result.marks}</span>
+                                <span class="text-gray-400 text-sm ml-2">/ 100</span>
+                            </td>
+                            <td class="p-3 border border-gray-700 text-gray-400">${date}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (container) {
+                container.innerHTML = html;
+                if (empty) empty.classList.add('hidden');
+            }
+        }
+
+        // Load admin results (Admin Portal)
+        window.loadAdminResults = function () {
+            const batchId = document.getElementById('admin-result-batch')?.value;
+            const container = document.getElementById('admin-results-container');
+            const empty = document.getElementById('admin-results-empty');
+
+            if (!batchId) {
+                if (empty) empty.classList.remove('hidden');
+                if (container) container.innerHTML = '';
+                return;
+            }
+
+            const results = getResultsStorage();
+            const batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+            const batch = batches.find(b => b.id === batchId);
+            const emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+
+            // Find all results for this batch
+            const batchResults = [];
+            Object.keys(results).forEach(key => {
+                const resultData = results[key];
+                const metadata = resultData._metadata || {};
+                if (metadata.batchId === batchId) {
+                    batchResults.push({
+                        key: key,
+                        subject: metadata.subject || 'Unknown',
+                        examType: metadata.examType || 'Unknown',
+                        data: resultData,
+                        updatedAt: metadata.updatedAt || ''
+                    });
+                }
+            });
+
+            if (batchResults.length === 0) {
+                if (empty) {
+                    empty.innerHTML = `
+                        <div class="w-20 h-20 rounded-full bg-gray-700/50 flex items-center justify-center mb-6 mx-auto">
+                            <i class="fas fa-poll text-3xl text-gray-500"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-200 mb-2">No Results Found</h3>
+                        <p class="text-gray-400">No results have been entered for this batch yet.</p>
+                    `;
+                    empty.classList.remove('hidden');
+                }
+                if (container) container.innerHTML = '';
+                return;
+            }
+
+            // Build HTML grouped by subject and exam type
+            let html = '';
+            batchResults.forEach(resultInfo => {
+                const { subject, examType, data, updatedAt } = resultInfo;
+                const date = updatedAt ? new Date(updatedAt).toLocaleDateString() : '-';
+                
+                html += `
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-700 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">${subject}</h3>
+                                <p class="text-gray-400 text-sm">${examType} • Updated: ${date}</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-gray-800">
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Roll No</th>
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Student Name</th>
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Email</th>
+                                        <th class="p-3 border border-gray-700 text-gray-300 font-semibold">Marks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+
+                // Get students from batch
+                if (batch && batch.students) {
+                    let rollNo = 1;
+                    batch.students.forEach(email => {
+                        const userData = Object.values(registeredUsers).find(u => u.email?.toLowerCase() === email.toLowerCase());
+                        const studentName = userData?.name || emailToNameMap[email] || email.split('@')[0];
+                        const studentId = userData?.id || `STU-${rollNo}`;
+                        const marks = data[email] !== undefined ? data[email] : '-';
+
+                        html += `
+                            <tr class="hover:bg-gray-700/30">
+                                <td class="p-3 border border-gray-700 text-gray-300 font-mono">${studentId}</td>
+                                <td class="p-3 border border-gray-700 text-white">${studentName}</td>
+                                <td class="p-3 border border-gray-700 text-gray-400 text-sm">${email}</td>
+                                <td class="p-3 border border-gray-700">
+                                    <span class="text-lg font-bold text-blue-400">${marks}</span>
+                                    ${marks !== '-' ? '<span class="text-gray-400 text-sm ml-2">/ 100</span>' : ''}
+                                </td>
+                            </tr>
+                        `;
+                        rollNo++;
+                    });
+                }
+
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (container) {
+                container.innerHTML = html;
+                if (empty) empty.classList.add('hidden');
+            }
+        };
+
+        // Initialize result batch selects when tabs are opened
+        document.querySelectorAll('.tab-btn-admin').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                if (tabId === 'admin-results') {
+                    populateAdminResultBatchSelect();
+                }
+            });
+        });
+
+        // Load student results when results tab is clicked
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                if (tabId === 'results') {
+                    loadStudentResults();
+                }
+            });
+        });
 
         window.addEventListener('load', async () => {
             try {
