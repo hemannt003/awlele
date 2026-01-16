@@ -143,8 +143,6 @@
     }
     </script>
 
-    </script>
-
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
@@ -388,6 +386,14 @@
 
 <body class="bg-gray-900 min-h-screen text-white">
 
+    <!-- Global Error Handler for Debugging -->
+    <script>
+        window.onerror = function (msg, url, line, col, error) {
+            console.error("Global Error:", msg, line, error);
+            // Optional: alert("Error: " + msg + "\nLine: " + line);
+        };
+    </script>
+
     <!-- LANDING PAGE / AUTH SCREENS (Full Screen - Moved Outside Main App) -->
     <div id="auth-screens" class="min-h-screen flex flex-col justify-center items-center p-4">
         <!-- Role Selection Screen -->
@@ -413,15 +419,16 @@
                     <h3 class="text-3xl font-bold text-white mb-4">Student</h3>
                     <p class="text-gray-400 text-base mb-10 leading-relaxed flex-grow">Access your attendance, manage
                         your timetable, and receive personalized learning suggestions.</p>
-                    <button
+                    <button onclick="enterStudentPortal()"
                         class="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg transition-all shadow-lg hover:shadow-blue-500/25">
                         Login as Student
                     </button>
+
                 </div>
 
                 <!-- Teacher Card -->
-                <div class="bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-green-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/10 flex flex-col items-center text-center cursor-pointer h-full"
-                    onclick="enterTeacherPortal()">
+                <div class="relative z-50 bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-green-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/10 flex flex-col items-center text-center cursor-pointer h-full"
+                    onclick="console.log('Teacher card clicked'); window.enterTeacherPortal()">
                     <div
                         class="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
                         <i class="fas fa-chalkboard-teacher text-4xl text-green-400"></i>
@@ -429,15 +436,17 @@
                     <h3 class="text-3xl font-bold text-white mb-4">Teacher</h3>
                     <p class="text-gray-400 text-base mb-10 leading-relaxed flex-grow">Mark class attendance, update
                         scheduling, and manage academic resources.</p>
-                    <button
+                    <button onclick="console.log('Teacher button clicked'); window.enterTeacherPortal()"
                         class="w-full py-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-lg transition-all shadow-lg hover:shadow-green-500/25">
                         Login as Teacher
                     </button>
+
+
                 </div>
 
                 <!-- Admin Card -->
-                <div class="bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-purple-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 flex flex-col items-center text-center cursor-pointer h-full"
-                    onclick="enterAdminPortal()">
+                <div class="relative z-50 bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-purple-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 flex flex-col items-center text-center cursor-pointer h-full"
+                    onclick="console.log('Admin card clicked'); window.enterAdminPortal()">
                     <div
                         class="w-24 h-24 rounded-full bg-purple-500/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
                         <i class="fas fa-user-shield text-4xl text-purple-400"></i>
@@ -445,10 +454,12 @@
                     <h3 class="text-3xl font-bold text-white mb-4">Administrator</h3>
                     <p class="text-gray-400 text-base mb-10 leading-relaxed flex-grow">System configuration, user
                         management, and institutional oversight.</p>
-                    <button
+                    <button onclick="console.log('Admin button clicked'); window.enterAdminPortal()"
                         class="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg transition-all shadow-lg hover:shadow-purple-500/25">
                         Login as Admin
                     </button>
+
+
                 </div>
             </div>
         </div>
@@ -491,64 +502,8 @@
 
 
 
-            <!-- Onboarding Step: Registration Details (Shown if user not in system) -->
-            <div id="register-screen"
-                class="hidden bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-700 animate-fade-in">
-                <h2 class="text-2xl font-bold text-center mb-8 text-white">Complete Profile</h2>
-
-                <div id="reg-step-face" class="space-y-6">
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 gap-4">
-                            <input type="hidden" id="reg-email">
-                            <div class="bg-gray-700/30 p-4 rounded-xl border border-gray-600 mb-2">
-                                <p class="text-xs text-gray-500 uppercase font-bold mb-1">Verifed Name</p>
-                                <input type="text" id="reg-fullname"
-                                    class="w-full bg-transparent text-white font-medium outline-none" readonly>
-                            </div>
-                            <input type="text" id="reg-college-id" placeholder="College ID *"
-                                class="w-full p-4 rounded-xl border border-gray-600 bg-gray-700/50 text-white focus:ring-2 focus:ring-blue-500 transition-all">
-                            <input type="text" id="reg-course" placeholder="Course (e.g., B.Tech CSE) *"
-                                class="w-full p-4 rounded-xl border border-gray-600 bg-gray-700/50 text-white focus:ring-2 focus:ring-blue-500 transition-all">
-                            <select id="reg-class"
-                                class="w-full p-4 rounded-xl border border-gray-600 bg-gray-700/50 text-white focus:ring-2 focus:ring-blue-500 transition-all">
-                                <option value="">Select Your Class *</option>
-                                <option value="Computer Science - A">Computer Science - A</option>
-                                <option value="Computer Science - B">Computer Science - B</option>
-                                <option value="Mechanical Eng - A">Mechanical Eng - A</option>
-                                <option value="Data Structures">Data Structures</option>
-                                <option value="Algorithms">Algorithms</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div
-                        class="camera-container rounded-2xl overflow-hidden mb-6 shadow-2xl mx-auto border-2 border-gray-700 w-full aspect-video bg-black relative">
-                        <video id="video-reg" class="w-full h-full object-cover"></video>
-                        <canvas id="canvas-reg" class="absolute top-0 left-0 w-full h-full"></canvas>
-
-                        <!-- Overlay for scanning status (non-liveness) -->
-                        <div id="scan-overlay"
-                            class="absolute inset-0 flex items-center justify-center bg-black/40 hidden">
-                            <div
-                                class="w-48 h-48 border-2 border-blue-500/50 rounded-full animate-pulse flex items-center justify-center">
-                                <div class="w-32 h-32 border-2 border-blue-400 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="register-btn"
-                        class="w-full py-4 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-xl font-bold text-lg hover:from-blue-700 hover:to-teal-700 shadow-lg transition-all transform hover:scale-[1.02]">
-                        Complete Registration
-                    </button>
-
-                    <button onclick="goHome()" class="w-full mt-2 text-sm text-gray-500 hover:text-gray-300 transition">
-                        &larr; Cancel
-                    </button>
-                </div>
-                <button onclick="goHome()" class="w-full mt-6 text-sm text-gray-400 hover:text-white transition">&larr;
-                    Cancel</button>
-            </div>
         </div>
+
 
         <!-- Loading -->
         <div id="loading" class="hidden text-center bg-gray-800 p-8 rounded-3xl shadow-xl">
@@ -563,7 +518,6 @@
             <h3 class="text-xl font-bold text-white">Initializing AI</h3>
             <p class="text-gray-400 mt-2">Loading secure face models...</p>
         </div>
-    </div>
     </div>
     <!-- Navigation Bar (Hidden on Landing) -->
     <nav id="navbar" class="hidden bg-blue-600 text-white shadow-lg sticky top-0 z-50">
@@ -1970,6 +1924,12 @@
     </div>
 
     <script>
+        window.onerror = function (msg, url, line, col, error) {
+            alert("Error: " + msg + "\nLine: " + line);
+            return false;
+        };
+        console.log("SPARK Script Initializing...");
+
         // ===== Face Recognition System =====
         const videoReg = document.getElementById('video-reg');
         const videoLogin = document.getElementById('video-login');
@@ -1983,8 +1943,6 @@
         const markAttendanceBtn = document.getElementById('mark-attendance-btn');
 
         const homeScreen = document.getElementById('home-screen');
-        const registerScreen = document.getElementById('register-screen');
-        const loginScreen = document.getElementById('login-screen');
         const loading = document.getElementById('loading');
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
@@ -1993,7 +1951,119 @@
         const studentAuth = document.getElementById('student-auth');
         const navbar = document.getElementById('navbar');
         const mobileTabs = document.getElementById('mobile-tabs');
-        const mainApp = document.getElementById('main-app'); // Added this
+        const mainApp = document.getElementById('main-app');
+        const teacherDashboard = document.getElementById('teacher-dashboard');
+        const adminDashboard = document.getElementById('admin-dashboard');
+
+        // HOISTED PORTAL FUNCTIONS
+        window.enterTeacherPortal = function () {
+            console.log("Teacher portal requested");
+            try {
+                localStorage.setItem('spark_teacher_active', 'true');
+                const auth = document.getElementById('auth-screens');
+                if (auth) auth.classList.add('hidden');
+
+                if (navbar) navbar.classList.add('hidden');
+                if (mobileTabs) mobileTabs.classList.add('hidden');
+                if (mainApp) mainApp.classList.add('hidden');
+                if (adminDashboard) adminDashboard.classList.add('hidden');
+
+                if (teacherDashboard) {
+                    teacherDashboard.classList.remove('hidden');
+                    teacherDashboard.style.display = 'block';
+                }
+
+                if (typeof syncTeacherPortalUI === 'function') syncTeacherPortalUI();
+                if (typeof updateTeacherStudentOverview === 'function') updateTeacherStudentOverview();
+            } catch (e) {
+                alert("Teacher Portal Error: " + e.message);
+            }
+        };
+
+        window.enterAdminPortal = function () {
+            console.log("Admin portal requested");
+            try {
+                localStorage.setItem('spark_admin_active', 'true');
+                const auth = document.getElementById('auth-screens');
+                if (auth) auth.classList.add('hidden');
+
+                if (navbar) navbar.classList.add('hidden');
+                if (mobileTabs) mobileTabs.classList.add('hidden');
+                if (mainApp) mainApp.classList.add('hidden');
+                if (teacherDashboard) teacherDashboard.classList.add('hidden');
+
+                if (adminDashboard) {
+                    adminDashboard.classList.remove('hidden');
+                    adminDashboard.style.display = 'block';
+                }
+
+                if (typeof renderAdminAttendance === 'function') renderAdminAttendance();
+            } catch (e) {
+                alert("Admin Portal Error: " + e.message);
+            }
+        };
+
+        // Hoisted Helper Functions
+        window.showTeacherSection = function (main, sub) {
+            const parent = document.getElementById('teacher-' + main);
+            if (parent) {
+                parent.querySelectorAll('.teacher-sub-tab-btn').forEach(b => {
+                    b.classList.remove('text-green-400', 'border-b-2', 'border-green-400');
+                    b.classList.add('text-gray-400');
+                    if (b.dataset.sub === sub) {
+                        b.classList.add('text-green-400', 'border-b-2', 'border-green-400');
+                        b.classList.remove('text-gray-400');
+                    }
+                });
+                parent.querySelectorAll('.teacher-sub-content').forEach(c => c.classList.add('hidden'));
+                const subContent = document.getElementById('teacher-sub-' + main + '-' + sub);
+                if (subContent) subContent.classList.remove('hidden');
+            }
+        };
+
+        window.showAdminSection = function (sub) {
+            document.querySelectorAll('.sub-tab-btn').forEach(b => {
+                b.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
+                b.classList.add('text-gray-400');
+                if (b.dataset.sub === sub) {
+                    b.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
+                    b.classList.remove('text-gray-400');
+                }
+            });
+
+            document.querySelectorAll('.admin-sub-content').forEach(c => c.classList.add('hidden'));
+            const subContent = document.getElementById('admin-sub-' + sub);
+            if (subContent) subContent.classList.remove('hidden');
+
+            if (sub === 'remove' || sub === 'modify') {
+                if (typeof renderAdminUserTable === 'function') renderAdminUserTable();
+            }
+        };
+
+        window.enterStudentPortal = function () {
+            console.log("Student portal requested");
+            try {
+                const roleSelection = document.getElementById('role-selection');
+                if (roleSelection) roleSelection.classList.add('hidden');
+                if (studentAuth) studentAuth.classList.remove('hidden');
+                if (typeof goHome === 'function') goHome();
+            } catch (e) {
+                alert("Student Portal Error: " + e.message);
+            }
+        };
+
+        window.backToRoles = function () {
+            console.log("Back to role selection");
+            try {
+                const roleSelection = document.getElementById('role-selection');
+                if (roleSelection) roleSelection.classList.remove('hidden');
+                if (studentAuth) studentAuth.classList.add('hidden');
+                if (typeof stopAllVideo === 'function') stopAllVideo();
+            } catch (e) {
+                console.error("Back to roles error:", e);
+            }
+        };
+
 
         let isVideoRegPlaying = false;
         let isVideoLoginPlaying = false;
@@ -2036,21 +2106,6 @@
         const goHome = () => {
             stopAllVideo();
             homeScreen.classList.remove('hidden');
-            registerScreen.classList.add('hidden');
-            loginScreen.classList.add('hidden');
-        };
-
-
-        const showRegister = () => {
-            homeScreen.classList.add('hidden');
-            registerScreen.classList.remove('hidden');
-            // We NO LONGER start video immediately. Google Login happens first.
-        };
-
-        const showLogin = () => {
-            homeScreen.classList.add('hidden');
-            loginScreen.classList.remove('hidden');
-            startVideo(videoLogin, canvasLogin, 'login');
         };
 
         const stopAllVideo = () => {
@@ -2068,10 +2123,10 @@
             isVideoAttendancePlaying = false;
         };
 
+
         // Google Auth Functions
         window.handleCredentialResponse = (response) => {
             try {
-                // Decode JWT manually (standard approach for GIS)
                 const base64Url = response.credential.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
@@ -2081,6 +2136,12 @@
                 const payload = JSON.parse(jsonPayload);
                 const email = payload.email;
                 const name = payload.name;
+
+                // Domain Restriction
+                if (!email.endsWith('@ietdavv.edu.in')) {
+                    showMessage("Access Denied: Please use your official @ietdavv.edu.in account.");
+                    return;
+                }
 
                 // Check if user already exists
                 let existingUser = null;
@@ -2092,26 +2153,35 @@
                 }
 
                 if (existingUser) {
-                    // AUTO LOGIN
                     loggedInUser = existingUser;
                     saveSession(loggedInUser);
                     toggleMainApp(true);
-                    populateProfileData(loggedInUser);
+                    populateProfileData();
                     showMessage("Welcome back, " + existingUser.name + "!");
                 } else {
-                    // NEW USER - SHOW REGISTRATION (Unified flow)
-                    pendingRegUsername = name.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000);
-                    const regEmail = document.getElementById('reg-email');
-                    if (regEmail) regEmail.value = email;
+                    // NEW USER - DIRECT LOGIN (Deferred enrollment)
+                    const username = name.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000);
+                    const newUser = {
+                        username: username,
+                        email: email,
+                        name: name,
+                        role: 'student',
+                        id: "STU" + Math.floor(Math.random() * 100000),
+                        course: 'B.Tech CS',
+                        studentClass: 'Computer Science - A',
+                        descriptor: null // Face not registered yet
+                    };
 
-                    const regFullname = document.getElementById('reg-fullname');
-                    if (regFullname) regFullname.value = name;
+                    registeredUsers[username] = newUser;
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
 
-                    showMessage("Account Verified! Please complete your profile.");
-                    homeScreen.classList.add('hidden');
-                    document.getElementById('register-screen').classList.remove('hidden');
-                    startVideo(videoReg, canvasReg, 'register');
+                    loggedInUser = newUser;
+                    saveSession(loggedInUser);
+                    toggleMainApp(true);
+                    populateProfileData();
+                    showMessage("Welcome, " + name + "! Please set your class in the Profile tab and register face ID during attendance.");
                 }
+
             } catch (error) {
                 console.error("Decoding JWT failed", error);
                 showMessage("Authentication failed. Please try again.");
@@ -2304,19 +2374,6 @@
             }
         };
 
-        // Transition from Role Selector to Student Home
-        window.enterStudentPortal = function () {
-            document.getElementById('role-selection').classList.add('hidden');
-            studentAuth.classList.remove('hidden'); // Show parent container
-            goHome(); // Ensure home screen is active
-        };
-
-        window.backToRoles = function () {
-            studentAuth.classList.add('hidden');
-            document.getElementById('role-selection').classList.remove('hidden');
-            stopAllVideo();
-        };
-
         // Update canvas size
         function updateCanvasSize(video, canvas) {
             if (!video || !canvas) return;
@@ -2452,13 +2509,42 @@
                                 localStorage.setItem('spark_role', 'student');
                                 showMessage("Verified & Logged In!");
                             } else {
-                                // Don't reset finalizeAction immediately to allow re-trying for a second?
-                                // Actually, let's reset it and show error.
                                 finalizeAction = false;
                                 showMessage("Face NOT recognized! Try again.");
-                                loginBtn.textContent = "Login with Face";
-                                loginBtn.disabled = false;
                             }
+                        } else if (livenessMode === 'enroll') {
+                            finalizeAction = false;
+
+                            // DUPLICATE FACE CHECK
+                            const currentDescriptor = resizedDetections.descriptor;
+                            let duplicateUser = null;
+                            for (const username in registeredUsers) {
+                                const user = registeredUsers[username];
+                                if (user.descriptor && username !== loggedInUser.username) {
+                                    const dist = faceapi.euclideanDistance(currentDescriptor, new Float32Array(user.descriptor));
+                                    if (dist < 0.5) {
+                                        duplicateUser = username;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (duplicateUser) {
+                                showMessage(`Face already linked to: ${duplicateUser}`);
+                                return;
+                            }
+
+                            // ENROLL
+                            registeredUsers[loggedInUser.username].descriptor = Array.from(resizedDetections.descriptor);
+                            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                            loggedInUser.descriptor = registeredUsers[loggedInUser.username].descriptor;
+
+                            showMessage("Face ID Linked! Now starting liveness verification...");
+
+                            setTimeout(() => {
+                                livenessMode = 'attendance';
+                                generateChallenges();
+                            }, 1500);
                         }
                     }
 
@@ -2490,43 +2576,46 @@
         };
 
         // Register button -> Validate profile details and capture face
-        registerBtn.addEventListener('click', async () => {
-            // Validate all profile fields
-            const fullname = document.getElementById('reg-fullname')?.value.trim();
-            const collegeId = document.getElementById('reg-college-id')?.value.trim();
-            const course = document.getElementById('reg-course')?.value.trim();
-            const studentClass = document.getElementById('reg-class')?.value;
-            const email = document.getElementById('reg-email')?.value.trim();
+        if (registerBtn) {
+            registerBtn.addEventListener('click', async () => {
+                // Validate all profile fields
+                const fullname = document.getElementById('reg-fullname')?.value.trim();
+                const collegeId = document.getElementById('reg-college-id')?.value.trim();
+                const course = document.getElementById('reg-course')?.value.trim();
+                const studentClass = document.getElementById('reg-class')?.value;
+                const email = document.getElementById('reg-email')?.value.trim();
 
-            if (!fullname || !collegeId || !course || !studentClass) {
-                showMessage("Please fill all profile details.");
-                return;
-            }
+                if (!fullname || !collegeId || !course || !studentClass) {
+                    showMessage("Please fill all profile details.");
+                    return;
+                }
 
-            // Check if College ID already exists
-            const idExists = Object.values(registeredUsers).some(u => u.id === collegeId);
-            if (idExists) { showMessage("This College ID is already registered."); return; }
+                // Check if College ID already exists
+                const idExists = Object.values(registeredUsers).some(u => u.id === collegeId);
+                if (idExists) { showMessage("This College ID is already registered."); return; }
 
-            // Store pending registration data
-            pendingRegUsername = fullname;
-            window.pendingRegData = {
-                fullname: fullname,
-                collegeId: collegeId,
-                email: email,
-                course: course,
-                studentClass: studentClass
-            };
+                // Store pending registration data
+                pendingRegUsername = fullname;
+                window.pendingRegData = {
+                    fullname: fullname,
+                    collegeId: collegeId,
+                    email: email,
+                    course: course,
+                    studentClass: studentClass
+                };
 
-            // Capture Face without liveness (Liveness moved to attendance)
-            livenessMode = 'register';
-            finalizeAction = true;
+                // Capture Face without liveness (Liveness moved to attendance)
+                livenessMode = 'register';
+                finalizeAction = true;
 
-            const scanOverlay = document.getElementById('scan-overlay');
-            if (scanOverlay) scanOverlay.classList.remove('hidden');
+                const scanOverlay = document.getElementById('scan-overlay');
+                if (scanOverlay) scanOverlay.classList.remove('hidden');
 
-            registerBtn.textContent = "Scanning...";
-            registerBtn.disabled = true;
-        });
+                registerBtn.textContent = "Scanning...";
+                registerBtn.disabled = true;
+            });
+        }
+
 
 
         // Attendance mark button
@@ -2722,27 +2811,38 @@
         setInterval(checkAttendanceLock, 1000);
 
         // Attendance mark button
-        markAttendanceBtn.addEventListener('click', async () => {
-            if (!loggedInUser) { showMessage("Not logged in."); return; }
+        if (markAttendanceBtn) {
+            markAttendanceBtn.addEventListener('click', async () => {
+                if (!loggedInUser) { showMessage("Not logged in."); return; }
 
-            const activePortal = localStorage.getItem('spark_active_attendance_portal');
-            const userClass = registeredUsers[loggedInUser.username]?.studentClass || '';
+                const activePortal = localStorage.getItem('spark_active_attendance_portal');
+                const userClass = registeredUsers[loggedInUser.username]?.studentClass || '';
 
-            if (!activePortal) {
-                showMessage("The attendance portal is closed.");
-                return;
-            }
+                if (!activePortal) {
+                    showMessage("The attendance portal is closed.");
+                    return;
+                }
 
-            if (activePortal !== userClass) {
-                showMessage(`Portal is for ${activePortal}, not ${userClass}.`);
-                return;
-            }
+                if (activePortal !== userClass) {
+                    showMessage(`Portal is for ${activePortal}, not ${userClass}.`);
+                    return;
+                }
 
-            // START LIVENESS SEQUENCE
-            livenessMode = 'attendance';
-            generateChallenges();
-            showMessage("Verify identity with liveness check...");
-        });
+                // CHECK IF ENROLLMENT NEEDED
+                if (!loggedInUser.descriptor) {
+                    showMessage("First-time verification: Linking Face ID...");
+                    livenessMode = 'enroll';
+                    finalizeAction = true;
+                    return;
+                }
+
+                // START LIVENESS SEQUENCE
+                livenessMode = 'attendance';
+                generateChallenges();
+                showMessage("Verify identity with liveness check...");
+            });
+        }
+
 
         // Helper to finalize attendance after face match + liveness
         async function finalizeAttendance() {
@@ -2802,14 +2902,20 @@
             toggleMainApp(false);
 
             // Go back to role selection on logout
-            document.getElementById('role-selection').classList.remove('hidden');
+            const roleSelection = document.getElementById('role-selection');
+            if (roleSelection) roleSelection.classList.remove('hidden');
             if (studentAuth) studentAuth.classList.add('hidden');
 
-            homeScreen.classList.add('hidden');
-            registerScreen.classList.add('hidden');
-            loginScreen.classList.add('hidden');
+            if (homeScreen) homeScreen.classList.add('hidden');
+            // Safely hide screens that might be missing
+            const regScreen = document.getElementById('register-screen');
+            const logScreen = document.getElementById('login-screen');
+            if (regScreen) regScreen.classList.add('hidden');
+            if (logScreen) logScreen.classList.add('hidden');
+
             stopAllVideo();
         };
+
 
         // ===== Dashboard Tab Functionality =====
 
@@ -2861,34 +2967,46 @@
         }
 
         // ===== Profile Save =====
-        document.getElementById('saveProfileBtn').addEventListener('click', () => {
-            const profile = {
-                name: document.getElementById('profile-name').value,
-                id: document.getElementById('profile-id').value,
-                email: document.getElementById('profile-email').value,
-                course: document.getElementById('profile-course').value,
-                goals: document.getElementById('profile-goals').value
-            };
-            localStorage.setItem('userProfile', JSON.stringify(profile));
-            // Update sidebar if logged in
-            document.getElementById('sidebar-username').textContent = profile.name;
-            document.getElementById('sidebar-id').textContent = profile.id;
-            showMessage('Profile saved successfully!');
-        });
+        const saveProfBtn = document.getElementById('saveProfileBtn');
+        if (saveProfBtn) {
+            saveProfBtn.addEventListener('click', () => {
+                const profile = {
+                    name: document.getElementById('profile-name')?.value || '',
+                    id: document.getElementById('profile-id')?.value || '',
+                    email: document.getElementById('profile-email')?.value || '',
+                    course: document.getElementById('profile-course')?.value || '',
+                    goals: document.getElementById('profile-goals')?.value || ''
+                };
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                // Update sidebar if logged in
+                document.getElementById('sidebar-username').textContent = profile.name;
+                document.getElementById('sidebar-id').textContent = profile.id;
+                showMessage('Profile saved successfully!');
+            });
+        }
 
         // Load profile on init (after login, but for demo)
         const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
         if (savedProfile) {
-            document.getElementById('profile-name').value = savedProfile.name || 'Rahul Sharma';
-            document.getElementById('profile-id').value = savedProfile.id || 'CS2021BATCH';
-            document.getElementById('profile-email').value = savedProfile.email || 'rahul@college.edu';
-            document.getElementById('profile-course').value = savedProfile.course || 'Computer Science';
-            document.getElementById('profile-goals').value = savedProfile.goals || '';
+            const pName = document.getElementById('profile-name');
+            const pId = document.getElementById('profile-id');
+            const pEmail = document.getElementById('profile-email');
+            const pCourse = document.getElementById('profile-course');
+            const pGoals = document.getElementById('profile-goals');
+
+            if (pName) pName.value = savedProfile.name || 'Rahul Sharma';
+            if (pId) pId.value = savedProfile.id || 'CS2021BATCH';
+            if (pEmail) pEmail.value = savedProfile.email || 'rahul@college.edu';
+            if (pCourse) pCourse.value = savedProfile.course || 'Computer Science';
+            if (pGoals) pGoals.value = savedProfile.goals || '';
         }
 
+
         // ===== Routine Export =====
-        document.getElementById('exportRoutineBtn').addEventListener('click', () => {
-            const routineText = `Daily Routine - Monday, 18 September 2025
+        const exportBtn = document.getElementById('exportRoutineBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                const routineText = `Daily Routine - Monday, 18 September 2025
 7:00 - Morning Routine (Completed)
 9:00 - Data Structures Class (Completed)
 10:00 - Algorithms Class (In Progress)
@@ -2896,17 +3014,19 @@
 12:00 - Lunch Break
 14:00 - Database Systems Class (Not Started)
 16:00 - Free Time - Suggested Activity (Not Started)`;
-            const blob = new Blob([routineText], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'daily_routine.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showMessage('Routine exported!');
-        });
+                const blob = new Blob([routineText], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'daily_routine.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showMessage('Routine exported!');
+            });
+        }
+
 
         // ===== Neon Rescheduler System =====
         /* ===== in-memory ===== */
@@ -2932,6 +3052,35 @@
         const absentBadge = document.getElementById('absentBadge');
         const backBtn = document.getElementById('backBtn');
         const downloadBtn = document.getElementById('downloadBtn');
+
+        /* Safe Listener Initialization */
+        if (addClassBtn) addClassBtn.addEventListener('click', () => addClass());
+        if (resetBtn) resetBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset everything?')) {
+                classes = [];
+                absentTeachers = new Set();
+                localStorage.removeItem('neon_classes');
+                localStorage.removeItem('neon_absent');
+                renderClasses();
+                refreshAbsentSelect();
+                renderTimetableInputs();
+            }
+        });
+        if (addAbsentBtn) addAbsentBtn.addEventListener('click', () => {
+            const t = absentTeacherSelect.value;
+            if (t && !absentTeachers.has(t)) {
+                absentTeachers.add(t);
+                refreshAbsentList();
+                refreshAbsentSelect();
+            }
+        });
+        if (previewBtn) previewBtn.addEventListener('click', renderPreview);
+        if (regenBtn) regenBtn.addEventListener('click', () => {
+            const m = regenerateScheduleModel();
+            renderResults(m);
+            if (resultView) resultView.style.display = 'block';
+        });
+
 
         /* ===== helpers ===== */
         function uid(prefix = 'id') { return prefix + Math.random().toString(36).slice(2, 9) }
@@ -3137,9 +3286,10 @@
                     const subj = c.timetable[p] || 'Free';
                     const subjObj = c.subjects.find(s => s.name === subj);
                     const teacher = subjObj ? subjObj.teacher : '';
+                    const teacherClass = absentTeachers.has(teacher) ? 'text-red-400' : ''; // Highlight absent teachers
                     cols.push(`<td>
                         <div>${escapeHtml(subj)}</div>
-                        <div class="slot-teacher">${escapeHtml(teacher || '')}</div>
+                        <div class="slot-teacher ${teacherClass}">${escapeHtml(teacher || '')}</div>
                     </td>`);
                 });
                 tr.innerHTML = cols.join('');
@@ -3412,32 +3562,37 @@
             resultTablesContainer.appendChild(bigTable);
         }
 
-        backBtn.addEventListener('click', () => {
-            resultView.style.display = 'none';
-        });
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                if (resultView) resultView.style.display = 'none';
+            });
+        }
 
-        downloadBtn.addEventListener('click', () => {
-            const model = regenerateScheduleModel();
-            const res = model.result;
-            const headers = ['Period', ...res.map(r => r.className)];
-            const periodLabels = Array.from({ length: periodCount }, (_, i) => `P${i + 1}`);
-            let rows = [headers.join(',')];
-            for (let p = 0; p < periodCount; p++) {
-                const row = [periodLabels[p]];
-                for (const r of res) {
-                    const s = r.schedule[p];
-                    const cell = s.subject + (s.teacher ? ` (${s.teacher})` : '');
-                    row.push('"' + cell.replace(/"/g, '""') + '"');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                const model = regenerateScheduleModel();
+                const res = model.result;
+                const headers = ['Period', ...res.map(r => r.className)];
+                const periodLabels = Array.from({ length: periodCount }, (_, i) => `P${i + 1}`);
+                let rows = [headers.join(',')];
+                for (let p = 0; p < periodCount; p++) {
+                    const row = [periodLabels[p]];
+                    for (const r of res) {
+                        const s = r.schedule[p];
+                        const cell = s.subject + (s.teacher ? ` (${s.teacher})` : '');
+                        row.push('"' + cell.replace(/"/g, '""') + '"');
+                    }
+                    rows.push(row.join(','));
                 }
-                rows.push(row.join(','));
-            }
-            const csv = rows.join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'regenerated_timetable.csv'; document.body.appendChild(a); a.click(); a.remove();
-            URL.revokeObjectURL(url);
-        });
+                const csv = rows.join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'regenerated_timetable.csv'; document.body.appendChild(a); a.click(); a.remove();
+                URL.revokeObjectURL(url);
+            });
+        }
+
 
         // Initialize the application
         // ===== TIMETABLE UPLOAD & EDIT FEATURE =====
@@ -3761,11 +3916,15 @@
             if (savedUser) {
                 try {
                     loggedInUser = JSON.parse(savedUser);
-                    // Update UI
-                    document.getElementById('nav-username').textContent = loggedInUser.username;
-                    document.getElementById('sidebar-username').textContent = loggedInUser.username;
-                    const uData = registeredUsers[loggedInUser.username] || {};
-                    document.getElementById('sidebar-id').textContent = uData.id || (loggedInUser.username + 'ID');
+                    // Update UI safely
+                    const navUser = document.getElementById('nav-username');
+                    if (navUser) navUser.textContent = loggedInUser.username;
+
+                    const bannerUser = document.querySelector('.banner-username');
+                    if (bannerUser) bannerUser.textContent = loggedInUser.name || loggedInUser.username;
+
+                    const navClass = document.getElementById('nav-class');
+                    if (navClass) navClass.textContent = loggedInUser.studentClass || 'Student';
 
                     // Show Main App
                     toggleMainApp(true);
@@ -3788,8 +3947,11 @@
                 }
             } else {
                 toggleMainApp(false);
-                document.getElementById('role-selection').classList.remove('hidden');
+                const roleSelection = document.getElementById('role-selection');
+                if (roleSelection) roleSelection.classList.remove('hidden');
                 if (studentAuth) studentAuth.classList.add('hidden');
+                const authScreens = document.getElementById('auth-screens');
+                if (authScreens) authScreens.classList.remove('hidden');
             }
         };
 
@@ -3820,34 +3982,73 @@
         // Populate Profile Data from Registration
         const populateProfileData = () => {
             if (!loggedInUser) return;
-
             const userData = registeredUsers[loggedInUser.username] || {};
 
-            // Populate profile fields
-            const profileName = document.getElementById('profile-name');
-            const profileId = document.getElementById('profile-id');
-            const profileEmail = document.getElementById('profile-email');
-            const profileCourse = document.getElementById('profile-course');
-            const profileClass = document.getElementById('profile-class');
+            const fields = {
+                'profile-name': userData.name || '',
+                'profile-id': userData.id || '',
+                'profile-email': userData.email || '',
+                'profile-course': userData.course || '',
+                'profile-class': userData.studentClass || ''
+            };
 
-            if (profileName && userData.name) profileName.value = userData.name;
-            if (profileId && userData.id) profileId.value = userData.id;
-            if (profileEmail && userData.email) profileEmail.value = userData.email;
-            if (profileCourse && userData.course) profileCourse.value = userData.course;
-            if (profileClass && userData.studentClass) profileClass.value = userData.studentClass;
+            for (const [id, val] of Object.entries(fields)) {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            }
         };
 
-        // Update login logic to save session
-        const originalLoginHandler = loginBtn.onclick; // We don't have direct access to the anonymous function from addEventListener
-        // Since we added event listener using addEventListener, we can't overwrite it easily unless we refactor.
-        // Instead, we will inject the saveSession call inside the existing loginBtn click handler logic.
-        // Wait, I can't inject into the previous function without replacing it.
-        // I should have edited the loginBtn handler in the previous step. 
-        // I will rely on the user refreshing the page to pick up the new logic if I edit the login handler in the next step.
-        // But for now, let's put the restore logic in 'load'.
+        // Save Profile Logic
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        if (saveProfileBtn) {
+            saveProfileBtn.onclick = () => {
+                if (!loggedInUser) return;
+
+                const updatedData = {
+                    name: document.getElementById('profile-name').value,
+                    id: document.getElementById('profile-id').value,
+                    email: document.getElementById('profile-email').value,
+                    course: document.getElementById('profile-course').value,
+                    studentClass: document.getElementById('profile-class').value
+                };
+
+                registeredUsers[loggedInUser.username] = {
+                    ...registeredUsers[loggedInUser.username],
+                    ...updatedData
+                };
+
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                loggedInUser = { ...loggedInUser, ...updatedData };
+                saveSession(loggedInUser);
+
+                // Update UI safely
+                const navUser = document.getElementById('nav-username');
+                if (navUser) navUser.textContent = loggedInUser.name;
+
+                const sideUser = document.getElementById('sidebar-username');
+                if (sideUser) sideUser.textContent = loggedInUser.name;
+
+                const sideId = document.getElementById('sidebar-id');
+                if (sideId) sideId.textContent = loggedInUser.id;
+
+                const bannerUser = document.querySelector('.banner-username');
+                if (bannerUser) bannerUser.textContent = loggedInUser.name;
+
+                const sidebarName = document.getElementById('sidebar-username');
+                if (sidebarName) sidebarName.textContent = loggedInUser.name;
+
+                const sidebarId = document.getElementById('sidebar-id');
+                if (sidebarId) sidebarId.textContent = loggedInUser.id;
+
+
+                updateDashboardStats();
+                showMessage("Profile updated successfully!");
+            };
+        }
+
 
         // ===== TEACHER PORTAL LOGIC =====
-        const teacherDashboard = document.getElementById('teacher-dashboard');
+
 
         window.toggleAttendancePortal = function (isOpen) {
             const classSelect = document.getElementById('teacher-portal-class-select');
@@ -4053,79 +4254,70 @@
 
         // Sync Portal UI on load/tab switch
         function syncTeacherPortalUI() {
-            const active = localStorage.getItem('spark_active_attendance_portal');
-            const badge = document.getElementById('attendance-portal-status-badge');
-            const btnOpen = document.getElementById('btn-open-portal');
-            const btnClose = document.getElementById('btn-close-portal');
-            const info = document.getElementById('portal-active-info');
-            const infoName = document.getElementById('active-portal-name');
-            const classSelect = document.getElementById('teacher-portal-class-select');
+            try {
+                const active = localStorage.getItem('spark_active_attendance_portal');
+                const badge = document.getElementById('attendance-portal-status-badge');
+                const btnOpen = document.getElementById('btn-open-portal');
+                const btnClose = document.getElementById('btn-close-portal');
+                const info = document.getElementById('portal-active-info');
+                const infoName = document.getElementById('active-portal-name');
+                const classSelect = document.getElementById('teacher-portal-class-select');
 
-            if (active) {
-                // If the selected class matches the active portal, show OPEN
-                if (classSelect && classSelect.value === active) {
-                    if (badge) {
-                        badge.textContent = "OPEN";
-                        badge.classList.remove('bg-red-900/40', 'text-red-400', 'border-red-900/50');
-                        badge.classList.add('bg-green-900/40', 'text-green-400', 'border-green-900/50');
+                if (active) {
+                    if (classSelect && classSelect.value === active) {
+                        if (badge) {
+                            badge.textContent = "OPEN";
+                            badge.classList.remove('bg-red-900/40', 'text-red-400', 'border-red-900/50');
+                            badge.classList.add('bg-green-900/40', 'text-green-400', 'border-green-900/50');
+                        }
+                        if (btnOpen) btnOpen.classList.add('hidden');
+                        if (btnClose) btnClose.classList.remove('hidden');
+                        if (info) info.classList.remove('hidden');
+                        if (infoName) infoName.textContent = active;
+                    } else {
+                        if (badge) {
+                            badge.textContent = "CLOSED (Active for " + active + ")";
+                            badge.classList.add('bg-red-900/40', 'text-red-400', 'border-red-900/50');
+                            badge.classList.remove('bg-green-900/40', 'text-green-400', 'border-green-900/50');
+                        }
+                        if (btnOpen) btnOpen.classList.remove('hidden');
+                        if (btnClose) btnClose.classList.add('hidden');
+                        if (info) info.classList.remove('hidden');
+                        if (infoName) infoName.textContent = active;
                     }
-                    if (btnOpen) btnOpen.classList.add('hidden');
-                    if (btnClose) btnClose.classList.remove('hidden');
-                    if (info) info.classList.remove('hidden');
-                    if (infoName) infoName.textContent = active;
                 } else {
-                    // Portal is open for a DIFFERENT class
                     if (badge) {
-                        badge.textContent = "CLOSED (Active for " + active + ")";
+                        badge.textContent = "CLOSED";
                         badge.classList.add('bg-red-900/40', 'text-red-400', 'border-red-900/50');
                         badge.classList.remove('bg-green-900/40', 'text-green-400', 'border-green-900/50');
                     }
                     if (btnOpen) btnOpen.classList.remove('hidden');
                     if (btnClose) btnClose.classList.add('hidden');
-                    if (info) info.classList.remove('hidden');
-                    if (infoName) infoName.textContent = active;
+                    if (info) info.classList.add('hidden');
                 }
-            } else {
-                if (badge) {
-                    badge.textContent = "CLOSED";
-                    badge.classList.add('bg-red-900/40', 'text-red-400', 'border-red-900/50');
-                    badge.classList.remove('bg-green-900/40', 'text-green-400', 'border-green-900/50');
-                }
-                if (btnOpen) btnOpen.classList.remove('hidden');
-                if (btnClose) btnClose.classList.add('hidden');
-                if (info) info.classList.add('hidden');
+            } catch (e) {
+                console.warn("syncTeacherPortalUI suppressed error:", e);
             }
         }
 
+
         // Add listener for class select
-        document.getElementById('teacher-portal-class-select').addEventListener('change', syncTeacherPortalUI);
+        const teacherClassSelect = document.getElementById('teacher-portal-class-select');
+        if (teacherClassSelect) {
+            teacherClassSelect.addEventListener('change', syncTeacherPortalUI);
+        }
 
-        window.enterTeacherPortal = function () {
-            localStorage.setItem('spark_teacher_active', 'true');
-            // Hide Auth Screens
-            document.getElementById('auth-screens').classList.add('hidden');
 
-            // Hide everything else
-            if (navbar) navbar.classList.add('hidden');
-            if (mobileTabs) mobileTabs.classList.add('hidden');
-            if (mainApp) mainApp.classList.add('hidden');
-            if (adminDashboard) adminDashboard.classList.add('hidden');
+        // Duplicate definition removed (already hoisted at the top)
 
-            // Show Teacher Dashboard
-            if (teacherDashboard) teacherDashboard.classList.remove('hidden');
-            syncTeacherPortalUI();
-            updateTeacherStudentOverview(); // Initialize student overview
-        };
+
+
 
         window.logoutTeacher = function () {
             localStorage.removeItem('spark_teacher_active');
-            if (teacherDashboard) teacherDashboard.classList.add('hidden');
-
-            // Restore Auth Selection
-            const authScreens = document.getElementById('auth-screens');
-            authScreens.classList.remove('hidden');
-            document.getElementById('role-selection').classList.remove('hidden');
+            location.reload();
         };
+
 
         // Teacher Tab Switching
         document.querySelectorAll('.tab-btn-teacher').forEach(btn => {
@@ -4148,54 +4340,21 @@
             });
         });
 
-        // Teacher Sub-section Switching
-        window.showTeacherSection = function (main, sub) {
-            // Find the sub-tab buttons for this main section
-            const parent = document.getElementById('teacher-' + main);
-            parent.querySelectorAll('.teacher-sub-tab-btn').forEach(b => {
-                b.classList.remove('text-green-400', 'border-b-2', 'border-green-400');
-                b.classList.add('text-gray-400');
-                if (b.dataset.sub === sub) {
-                    b.classList.add('text-green-400', 'border-b-2', 'border-green-400');
-                    b.classList.remove('text-gray-400');
-                }
-            });
 
-            // Show the sub-content
-            parent.querySelectorAll('.teacher-sub-content').forEach(c => c.classList.add('hidden'));
-            const subContent = document.getElementById('teacher-sub-' + main + '-' + sub);
-            if (subContent) subContent.classList.remove('hidden');
-        };
 
         // ===== ADMIN PORTAL LOGIC =====
-        const adminDashboard = document.getElementById('admin-dashboard');
 
-        window.enterAdminPortal = function () {
-            localStorage.setItem('spark_admin_active', 'true');
-            // Hide Auth Screens Container completely
-            document.getElementById('auth-screens').classList.add('hidden');
 
-            // Hide Student Main App elements to be safe
-            if (navbar) navbar.classList.add('hidden');
-            if (mobileTabs) mobileTabs.classList.add('hidden');
-            if (mainApp) mainApp.classList.add('hidden');
+        // Duplicate definition removed (already hoisted at the top)
 
-            // Show Admin Dashboard
-            if (adminDashboard) adminDashboard.classList.remove('hidden');
-            renderAdminAttendance();
-        };
+
+
 
         window.logoutAdmin = function () {
             localStorage.removeItem('spark_admin_active');
-            if (adminDashboard) adminDashboard.classList.add('hidden');
-
-            // Restore Auth Screens
-            const authScreens = document.getElementById('auth-screens');
-            authScreens.classList.remove('hidden');
-
-            document.getElementById('role-selection').classList.remove('hidden');
-            if (studentAuth) studentAuth.classList.add('hidden');
+            location.reload();
         };
+
 
         // Admin Tab Switching
         document.querySelectorAll('.tab-btn-admin').forEach(btn => {
@@ -4220,25 +4379,7 @@
             });
         });
 
-        // Admin Sub-section Switching (Add/Remove/Modify)
-        window.showAdminSection = function (sub) {
-            document.querySelectorAll('.sub-tab-btn').forEach(b => {
-                b.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
-                b.classList.add('text-gray-400');
-                if (b.dataset.sub === sub) {
-                    b.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
-                    b.classList.remove('text-gray-400');
-                }
-            });
 
-            document.querySelectorAll('.admin-sub-content').forEach(c => c.classList.add('hidden'));
-            const subContent = document.getElementById('admin-sub-' + sub);
-            if (subContent) subContent.classList.remove('hidden');
-
-            if (sub === 'remove' || sub === 'modify') {
-                renderAdminUserTable(); // Populate lists
-            }
-        };
 
         // User Management
         window.adminAddUserManual = function () {
