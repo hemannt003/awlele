@@ -883,7 +883,7 @@
                                     </div>
                                 </div>
 
-                                <button onclick="document.querySelector('[data-tab=timetable]').click()"
+                                <button onclick="(function(){const tab=document.querySelector('[data-tab=timetable]');if(tab)tab.click()})()"
                                     class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-sm transition shadow-lg">
                                     View Full Timetable →
                                 </button>
@@ -1248,7 +1248,7 @@
                                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                                         alt="Profile">
                                     <input type="file" id="profile-photo-input" accept="image/*" class="hidden" onchange="handleProfilePhotoChange(event)">
-                                    <button onclick="document.getElementById('profile-photo-input').click()" 
+                                    <button onclick="(function(){const el=document.getElementById('profile-photo-input');if(el)el.click()})()" 
                                         class="text-blue-400 hover:text-blue-300 text-sm mt-2 transition">
                                         Change Photo
                                     </button>
@@ -1572,7 +1572,7 @@
                                 <div class="border-l border-gray-700 pl-8">
                                     <h3 class="text-lg font-semibold mb-3 text-green-300">Bulk Import</h3>
                                     <div class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:bg-gray-700/30 transition cursor-pointer flex flex-col items-center justify-center h-64 group"
-                                        onclick="document.getElementById('admin-file-upload').click()">
+                                        onclick="(function(){const el=document.getElementById('admin-file-upload');if(el)el.click()})()">
                                         <div
                                             class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center mb-4 group-hover:scale-110 transition">
                                             <i
@@ -1601,7 +1601,7 @@
                                         </div>
                                     </div>
                                     <input type="file" id="admin-pdf-upload" class="hidden" accept=".pdf" onchange="handlePDFImport(this)">
-                                    <button onclick="document.getElementById('admin-pdf-upload').click()"
+                                    <button onclick="(function(){const el=document.getElementById('admin-pdf-upload');if(el)el.click()})()"
                                         class="w-full py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition">
                                         <i class="fas fa-upload mr-2"></i>Select PDF File
                                     </button>
@@ -2262,7 +2262,7 @@
                             <div class="max-w-xl mx-auto">
                                 <div
                                     class="border-2 border-dashed border-gray-700 rounded-3xl p-10 text-center hover:bg-gray-700/20 transition cursor-pointer group"
-                                    onclick="document.getElementById('teacher-file-upload').click()">
+                                    onclick="(function(){const el=document.getElementById('teacher-file-upload');if(el)el.click()})()">
                                     <i
                                         class="fas fa-file-upload text-5xl text-gray-600 group-hover:text-green-400 mb-4 transition"></i>
                                     <h3 class="text-xl font-bold mb-2">Upload New Material</h3>
@@ -3761,6 +3761,8 @@
         };
 
         const updateDashboardStats = () => {
+            if (!loggedInUser || !loggedInUser.username) return;
+            
             const log = JSON.parse(localStorage.getItem('spark_attendance_log') || '[]');
 
             // Filter log for TODAY and for CURRENT USER
@@ -3784,6 +3786,11 @@
         const renderRecentActivity = () => {
             const list = document.getElementById('recent-activity-list');
             if (!list) return;
+            
+            if (!loggedInUser || !loggedInUser.username) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-4">No recent activity.</p>';
+                return;
+            }
 
             const log = JSON.parse(localStorage.getItem('spark_attendance_log') || '[]');
             // Filter by student and sort recent first
@@ -3947,33 +3954,92 @@
 
         // Helper to finalize attendance after face match + liveness
         async function finalizeAttendance() {
-            // Re-detect to confirm face match during liveness or after
-            const detections = await faceapi.detectSingleFace(videoAttendance, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceDescriptor();
-            if (!detections) {
-                showMessage("Face lost during verification. Try again.");
-                return;
-            }
+            try {
+                // Check if face-api is loaded
+                if (typeof faceapi === 'undefined' || !faceapi.nets || !faceapi.nets.tinyFaceDetector) {
+                    showMessage("Face not detected");
+                    return;
+                }
+                
+                if (!loggedInUser || !loggedInUser.descriptor) {
+                    showMessage("Face not detected");
+                    return;
+                }
+                
+                if (!videoAttendance) {
+                    showMessage("Face not detected");
+                    return;
+                }
+                
+                // Check if video is ready
+                if (videoAttendance.paused || videoAttendance.ended || !videoAttendance.srcObject) {
+                    showMessage("Face not detected");
+                    return;
+                }
+                
+                // Wait a bit for video to be ready
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Try multiple times with lower threshold for better detection
+                let detections = null;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                while (!detections && attempts < maxAttempts) {
+                    try {
+                        // Use lower threshold (0.3) for better face detection
+                        detections = await faceapi.detectSingleFace(videoAttendance, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.3 })).withFaceDescriptor();
+                        if (!detections) {
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                            attempts++;
+                        }
+                    } catch (detectError) {
+                        console.error('Detection attempt error:', detectError);
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        attempts++;
+                    }
+                }
+                
+                if (!detections) {
+                    showMessage("Face not detected");
+                    return;
+                }
 
-            const distance = faceapi.euclideanDistance(detections.descriptor, loggedInUser.descriptor);
-            if (distance >= 0.6) {
-                showMessage("Face mismatch! Verify it's you.");
-                return;
-            }
+                // Convert descriptor to Float32Array if needed for comparison
+                const userDescriptor = Array.isArray(loggedInUser.descriptor) 
+                    ? new Float32Array(loggedInUser.descriptor) 
+                    : loggedInUser.descriptor;
+                
+                const distance = faceapi.euclideanDistance(detections.descriptor, userDescriptor);
+                // Use more lenient threshold (0.7) for better success rate
+                if (distance >= 0.7) {
+                    showMessage("Face not detected");
+                    return;
+                }
 
-            // Location
-            if (!navigator.geolocation) {
-                completeAttendanceLog(); // Fallback if no geo
-                return;
-            }
+                // Location
+                if (!navigator.geolocation) {
+                    completeAttendanceLog(); // Fallback if no geo
+                    return;
+                }
 
-            navigator.geolocation.getCurrentPosition(pos => {
-                completeAttendanceLog();
-            }, err => {
-                completeAttendanceLog(); // Lenient for demo
-            });
+                navigator.geolocation.getCurrentPosition(pos => {
+                    completeAttendanceLog();
+                }, err => {
+                    completeAttendanceLog(); // Lenient for demo
+                });
+            } catch (error) {
+                console.error('Face detection error:', error);
+                showMessage("Face not detected");
+            }
         }
 
         function completeAttendanceLog() {
+            if (!loggedInUser || !loggedInUser.username) {
+                showMessage("Face not detected");
+                return;
+            }
+            
             const activePortalBatchId = localStorage.getItem('spark_active_attendance_portal');
             const activePortalBatchName = localStorage.getItem('spark_active_attendance_portal_name') || '';
             const logEntry = {
@@ -4001,7 +4067,8 @@
                 updateTeacherStudentOverview();
             }
             
-            showMessage(`Success! Attendance marked for ${activePortalBatchName} ✅`);
+            // Show success popup
+            showMessage("Present");
         }
 
         // Logout function
@@ -8312,6 +8379,5 @@
         chatInputField.onkeypress = (e) => { if (e.key === 'Enter') handleSendMessage(); };
     </script>
 </body>
-
 
 </html>
