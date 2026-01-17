@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>spark - Integrated Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js" defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -156,7 +156,7 @@
 
         // 1. PASTE YOUR NEW API KEY HERE
 
-        const API_KEY = "Enter your API key";
+        const API_KEY = "AIzaSyBXkAtIztvyuPir5gX5dcuREunMePkQ0q0";
 
 
         try {
@@ -499,24 +499,65 @@
                         <div class="flex-1 border-t border-gray-700"></div>
                     </div>
 
-                    <button id="manual-email-btn" onclick="showManualEmailInput()"
-                        class="w-full py-3 px-4 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium text-base transition-all shadow-md hover:shadow-lg border border-gray-600 hover:border-gray-500">
-                        <i class="fas fa-envelope mr-2"></i>Manually Add Email
+                    <button id="manual-entry-btn" onclick="showManualEntryForm()"
+                        class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base transition-all shadow-md hover:shadow-lg border border-indigo-500 hover:border-indigo-400">
+                        <i class="fas fa-user-plus mr-2"></i>Manual Entry & Face Registration
                     </button>
 
-                    <div id="manual-email-container" class="hidden">
+                    <div id="manual-entry-container" class="hidden">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                                <input type="email" id="manual-email-input" placeholder="Enter your email"
-                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleManualEmail(); }">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                                <input type="text" id="manual-fullname" placeholder="Enter your full name"
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             </div>
-                            <button onclick="handleManualEmail()"
-                                class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-base transition-all shadow-md hover:shadow-lg">
-                                Continue
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                                <input type="email" id="manual-email" placeholder="Enter your email"
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">College ID</label>
+                                <input type="text" id="manual-college-id" placeholder="Enter your college ID"
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Course</label>
+                                <input type="text" id="manual-course" placeholder="Enter your course"
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Class</label>
+                                <input type="text" id="manual-class" placeholder="Enter your class"
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <!-- Face Registration Camera -->
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Face Registration</label>
+                                <div id="manual-face-registration" class="camera-container rounded-lg overflow-hidden border-2 border-gray-600 relative bg-black" style="height: 300px;">
+                                    <video id="manual-video-reg" class="block w-full h-full object-cover"></video>
+                                    <canvas id="manual-canvas-reg" class="absolute top-0 left-0"></canvas>
+                                    <div id="manual-face-status" class="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-center py-2 text-sm">
+                                        Position your face in front of the camera
+                                    </div>
+                                </div>
+                                <button id="manual-start-camera-btn" onclick="startManualFaceRegistration()"
+                                    class="w-full mt-2 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all">
+                                    <i class="fas fa-camera mr-2"></i>Start Camera
+                                </button>
+                                <button id="manual-capture-face-btn" onclick="captureManualFace()" 
+                                    class="w-full mt-2 py-2 px-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium text-sm transition-all hidden">
+                                    <i class="fas fa-check mr-2"></i>Capture Face
+                                </button>
+                            </div>
+
+                            <button onclick="handleManualEntry()" id="manual-submit-btn"
+                                class="w-full py-3 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-medium text-base transition-all shadow-md hover:shadow-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+                                disabled>
+                                <i class="fas fa-check mr-2"></i>Register & Continue
                             </button>
-                            <button onclick="hideManualEmailInput()"
+                            <button onclick="hideManualEntryForm()"
                                 class="w-full text-center text-gray-400 hover:text-gray-300 text-sm transition-colors">
                                 Cancel
                             </button>
@@ -2723,9 +2764,10 @@
                 const daysAgo = Math.floor((Date.now() - uploadDate.getTime()) / (1000 * 60 * 60 * 24));
                 const dateText = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
 
-                const fileIcon = material.fileName.endsWith('.pdf') ? 'fa-file-pdf text-red-400' :
-                                material.fileName.endsWith('.ppt') || material.fileName.endsWith('.pptx') ? 'fa-file-powerpoint text-orange-400' :
-                                material.fileName.endsWith('.doc') || material.fileName.endsWith('.docx') ? 'fa-file-word text-blue-400' :
+                const fileName = material.fileName || '';
+                const fileIcon = fileName.endsWith('.pdf') ? 'fa-file-pdf text-red-400' :
+                                fileName.endsWith('.ppt') || fileName.endsWith('.pptx') ? 'fa-file-powerpoint text-orange-400' :
+                                fileName.endsWith('.doc') || fileName.endsWith('.docx') ? 'fa-file-word text-blue-400' :
                                 'fa-file text-gray-400';
 
                 // Escape user input to prevent XSS
@@ -2796,8 +2838,8 @@
             // Filter by search term
             if (searchTerm) {
                 filteredMaterials = filteredMaterials.filter(material =>
-                    material.title.toLowerCase().includes(searchTerm) ||
-                    material.fileName.toLowerCase().includes(searchTerm)
+                    (material.title || '').toLowerCase().includes(searchTerm) ||
+                    (material.fileName || '').toLowerCase().includes(searchTerm)
                 );
             }
 
@@ -2944,12 +2986,46 @@
         let pendingRegUsername = '';
 
         let regInterval, loginInterval, attendanceInterval;
-        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+        let registeredUsers = {};
         let loggedInUser = null;
+        
+        // Safely load registeredUsers from localStorage
+        try {
+            const stored = localStorage.getItem('registeredUsers');
+            if (stored) {
+                registeredUsers = JSON.parse(stored);
+            }
+        } catch (err) {
+            console.error('Error loading registeredUsers from localStorage:', err);
+            registeredUsers = {};
+            try {
+                localStorage.setItem('registeredUsers', '{}');
+            } catch (e) {
+                console.error('Error resetting registeredUsers in localStorage:', e);
+            }
+        }
 
         // Classroom location
-        const CLASSROOM_LOCATION = { lat: 22.681432, lon: 75.879018 };
+        const CLASSROOM_LOCATION = { lat: 22.681104, lon: 75.879651 };
         const RADIUS_METERS = 50;
+
+        // Helper function to safely parse JSON from localStorage
+        function safeParseJSON(key, defaultValue) {
+            try {
+                const stored = localStorage.getItem(key);
+                if (!stored) return defaultValue;
+                return JSON.parse(stored);
+            } catch (err) {
+                console.error(`Error parsing ${key} from localStorage:`, err);
+                return defaultValue;
+            }
+        }
+
+        // Helper function to safely find batch
+        function safeFindBatch(batches, batchId) {
+            if (!Array.isArray(batches) || !batchId) return null;
+            return batches.find(b => b && b.id === batchId) || null;
+        }
 
         // Utility functions
         const showMessage = (msg) => { 
@@ -3000,18 +3076,49 @@
         // Google Auth Functions
         window.handleCredentialResponse = (response) => {
             try {
-                const base64Url = response.credential.split('.')[1];
+                if (!response || !response.credential) {
+                    showMessage("Invalid authentication response.");
+                    return;
+                }
+                
+                const credentialParts = response.credential.split('.');
+                if (credentialParts.length < 2) {
+                    showMessage("Invalid credential format.");
+                    return;
+                }
+                
+                const base64Url = credentialParts[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
+                let jsonPayload;
+                try {
+                    jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                } catch (err) {
+                    console.error('Error decoding JWT:', err);
+                    showMessage("Error decoding authentication token.");
+                    return;
+                }
 
-                const payload = JSON.parse(jsonPayload);
+                let payload;
+                try {
+                    payload = JSON.parse(jsonPayload);
+                } catch (err) {
+                    console.error('Error parsing JWT payload:', err);
+                    showMessage("Error parsing authentication data.");
+                    return;
+                }
+                
+                if (!payload || !payload.email) {
+                    showMessage("Invalid authentication data.");
+                    return;
+                }
+                
                 const email = payload.email;
-                let name = payload.name;
+                let name = payload.name || email.split('@')[0];
 
                 // Domain Restriction
-                if (!email.endsWith('@ietdavv.edu.in')) {
+                if (!email || typeof email !== 'string' || !email.endsWith('@ietdavv.edu.in')) {
                     showMessage("Access Denied: Please use your official @ietdavv.edu.in account.");
                     return;
                 }
@@ -3024,14 +3131,19 @@
 
                 // Check if user already exists
                 let existingUser = null;
-                for (let username in registeredUsers) {
-                    if (registeredUsers[username].email === email) {
-                        existingUser = { username, ...registeredUsers[username] };
+            for (let username in registeredUsers) {
+                if (registeredUsers[username] && registeredUsers[username].email === email) {
+                    existingUser = { username, ...registeredUsers[username] };
                         // Update name if admin has set it
                         if (emailToNameMap[email] && emailToNameMap[email] !== existingUser.name) {
                             existingUser.name = emailToNameMap[email];
                             registeredUsers[username].name = emailToNameMap[email];
-                            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                            try {
+                                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                            } catch (err) {
+                                console.error('Error saving registeredUsers to localStorage:', err);
+                                showMessage("Error saving data. Please try again.");
+                            }
                         }
                         break;
                     }
@@ -3043,10 +3155,21 @@
                     toggleMainApp(true);
                     populateProfileData();
                     updateDashboardProfile();
-                    showMessage("Welcome back, " + existingUser.name + "!");
+                    
+                    // Check if user needs face registration (no descriptor)
+                    if (!existingUser.descriptor || existingUser.descriptor.length === 0) {
+                        showMessage("Welcome back, " + existingUser.name + "! Please register your face.");
+                        // Automatically start face registration
+                        setTimeout(() => {
+                            startFaceRegistrationFlow();
+                        }, 1000);
+                    } else {
+                        showMessage("Welcome back, " + existingUser.name + "!");
+                    }
                 } else {
                     // NEW USER - DIRECT LOGIN (Deferred enrollment)
-                    const username = name.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000);
+                    const safeName = name || 'user';
+                    const username = safeName.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000);
                     const newUser = {
                         username: username,
                         email: email,
@@ -3054,7 +3177,8 @@
                         role: 'student',
                         id: "STU" + Math.floor(Math.random() * 100000),
                         course: 'B.Tech CS',
-                        descriptor: null // Face not registered yet
+                        descriptor: null, // Face not registered yet
+                        faceKey: null // Unique face key will be generated during registration
                     };
 
                     registeredUsers[username] = newUser;
@@ -3065,7 +3189,12 @@
                     toggleMainApp(true);
                     populateProfileData();
                     updateDashboardProfile();
-                    showMessage("Welcome, " + name + "! Please register face ID during attendance.");
+                    showMessage("Welcome, " + name + "! Please register your face.");
+                    
+                    // Automatically start face registration for new users
+                    setTimeout(() => {
+                        startFaceRegistrationFlow();
+                    }, 1000);
                 }
 
             } catch (error) {
@@ -3074,47 +3203,224 @@
             }
         };
 
-        // Manual Email Functions
-        window.showManualEmailInput = () => {
-            const container = document.getElementById('manual-email-container');
-            const input = document.getElementById('manual-email-input');
-            const button = document.getElementById('manual-email-btn');
+        // Manual Entry Variables
+        let manualVideoStream = null;
+        let manualFaceDescriptor = null;
+        let manualVideoFrames = [];
+        let manualVideoInterval = null;
+        let isManualVideoPlaying = false;
+
+        // Manual Entry Functions
+        window.showManualEntryForm = () => {
+            const container = document.getElementById('manual-entry-container');
+            const button = document.getElementById('manual-entry-btn');
             if (container) {
                 container.classList.remove('hidden');
-                if (input) {
-                    input.focus();
-                }
             }
             if (button) {
                 button.classList.add('hidden');
             }
         };
 
-        window.hideManualEmailInput = () => {
-            const container = document.getElementById('manual-email-container');
-            const input = document.getElementById('manual-email-input');
-            const button = document.getElementById('manual-email-btn');
+        window.hideManualEntryForm = () => {
+            const container = document.getElementById('manual-entry-container');
+            const button = document.getElementById('manual-entry-btn');
             if (container) {
                 container.classList.add('hidden');
-            }
-            if (input) {
-                input.value = '';
             }
             if (button) {
                 button.classList.remove('hidden');
             }
+            // Stop camera if running
+            stopManualFaceRegistration();
+            // Clear form
+            const fullnameInput = document.getElementById('manual-fullname');
+            const emailInput = document.getElementById('manual-email');
+            const collegeIdInput = document.getElementById('manual-college-id');
+            const courseInput = document.getElementById('manual-course');
+            const classInput = document.getElementById('manual-class');
+            
+            if (fullnameInput) fullnameInput.value = '';
+            if (emailInput) emailInput.value = '';
+            if (collegeIdInput) collegeIdInput.value = '';
+            if (courseInput) courseInput.value = '';
+            if (classInput) classInput.value = '';
+            manualFaceDescriptor = null;
+            manualVideoFrames = [];
         };
 
-        window.handleManualEmail = () => {
-            const emailInput = document.getElementById('manual-email-input');
-            const email = emailInput?.value.trim();
+        // Start manual face registration camera
+        window.startManualFaceRegistration = async () => {
+            const video = document.getElementById('manual-video-reg');
+            const canvas = document.getElementById('manual-canvas-reg');
+            const startBtn = document.getElementById('manual-start-camera-btn');
+            const captureBtn = document.getElementById('manual-capture-face-btn');
+            const statusDiv = document.getElementById('manual-face-status');
 
-            if (!email) {
-                showMessage("Please enter your email address.");
+            if (!video || !canvas) {
+                showMessage("Camera elements not found.");
                 return;
             }
 
-            // Basic email validation
+            try {
+                // Load models if needed
+                if (!modelsLoaded) {
+                    await loadModels(true);
+                }
+
+                // Get camera stream
+                manualVideoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = manualVideoStream;
+                
+                video.onloadedmetadata = () => {
+                    video.play();
+                    isManualVideoPlaying = true;
+                    
+                    // Set canvas size
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    // Start face detection
+                    const context = canvas.getContext('2d');
+                    manualVideoInterval = setInterval(async () => {
+                        if (!isManualVideoPlaying) {
+                            clearInterval(manualVideoInterval);
+                            return;
+                        }
+                        
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                        
+                        try {
+                            // Check if faceapi is available
+                            if (typeof faceapi === 'undefined' || !faceapi.detectSingleFace) {
+                                console.warn('Face API not available');
+                                return;
+                            }
+                            
+                            const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+                                .withFaceLandmarks().withFaceDescriptor();
+                            
+                            if (detections) {
+                                const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
+                                faceapi.draw.drawDetections(canvas, resizedDetections);
+                                faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+                                
+                                // Store face descriptor
+                                if (resizedDetections.descriptor && Array.isArray(resizedDetections.descriptor)) {
+                                    manualFaceDescriptor = Array.from(resizedDetections.descriptor);
+                                } else if (resizedDetections.descriptor) {
+                                    manualFaceDescriptor = Array.from(resizedDetections.descriptor);
+                                }
+                                
+                                // Capture video frame
+                                if (manualVideoFrames.length < 10) { // Store up to 10 frames
+                                    const frameData = canvas.toDataURL('image/jpeg', 0.8);
+                                    manualVideoFrames.push(frameData);
+                                }
+                                
+                                if (statusDiv) {
+                                    statusDiv.textContent = '✓ Face detected - Ready to capture';
+                                    statusDiv.className = 'absolute bottom-0 left-0 right-0 bg-green-600/70 text-white text-center py-2 text-sm';
+                                }
+                                
+                                if (captureBtn) {
+                                    captureBtn.classList.remove('hidden');
+                                }
+                            } else {
+                                if (statusDiv) {
+                                    statusDiv.textContent = 'Position your face in front of the camera';
+                                    statusDiv.className = 'absolute bottom-0 left-0 right-0 bg-black/70 text-white text-center py-2 text-sm';
+                                }
+                                if (captureBtn) {
+                                    captureBtn.classList.add('hidden');
+                                }
+                            }
+                        } catch (err) {
+                            console.error('Face detection error:', err);
+                        }
+                    }, 200);
+                };
+
+                if (startBtn) startBtn.classList.add('hidden');
+                if (statusDiv) {
+                    statusDiv.textContent = 'Starting camera...';
+                }
+            } catch (err) {
+                console.error('Camera error:', err);
+                showMessage("Could not access camera. Please allow camera permissions.");
+            }
+        };
+
+        // Capture face manually
+        window.captureManualFace = () => {
+            if (!manualFaceDescriptor || manualFaceDescriptor.length === 0) {
+                showMessage("Please wait for face detection.");
+                return;
+            }
+            
+            const submitBtn = document.getElementById('manual-submit-btn');
+            const statusDiv = document.getElementById('manual-face-status');
+            
+            if (statusDiv) {
+                statusDiv.textContent = '✓ Face captured successfully!';
+                statusDiv.className = 'absolute bottom-0 left-0 right-0 bg-green-600/70 text-white text-center py-2 text-sm';
+            }
+            
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+            
+            showMessage("Face captured! Please fill all details and click Register.");
+        };
+
+        // Stop manual face registration
+        function stopManualFaceRegistration() {
+            isManualVideoPlaying = false;
+            if (manualVideoInterval) {
+                clearInterval(manualVideoInterval);
+                manualVideoInterval = null;
+            }
+            if (manualVideoStream) {
+                manualVideoStream.getTracks().forEach(track => track.stop());
+                manualVideoStream = null;
+            }
+            const video = document.getElementById('manual-video-reg');
+            const canvas = document.getElementById('manual-canvas-reg');
+            if (video) {
+                video.srcObject = null;
+            }
+            if (canvas) {
+                const context = canvas.getContext('2d');
+                context.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            const startBtn = document.getElementById('manual-start-camera-btn');
+            const captureBtn = document.getElementById('manual-capture-face-btn');
+            const statusDiv = document.getElementById('manual-face-status');
+            
+            if (startBtn) startBtn.classList.remove('hidden');
+            if (captureBtn) captureBtn.classList.add('hidden');
+            if (statusDiv) {
+                statusDiv.textContent = 'Position your face in front of the camera';
+                statusDiv.className = 'absolute bottom-0 left-0 right-0 bg-black/70 text-white text-center py-2 text-sm';
+            }
+        }
+
+        window.handleManualEntry = () => {
+            // Get form values
+            const fullname = document.getElementById('manual-fullname')?.value.trim();
+            const email = document.getElementById('manual-email')?.value.trim();
+            const collegeId = document.getElementById('manual-college-id')?.value.trim();
+            const course = document.getElementById('manual-course')?.value.trim();
+            const studentClass = document.getElementById('manual-class')?.value.trim();
+
+            // Validate all fields
+            if (!fullname || !email || !collegeId || !course || !studentClass) {
+                showMessage("Please fill all fields.");
+                return;
+            }
+
+            // Validate email format
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 showMessage("Please enter a valid email address.");
@@ -3122,89 +3428,94 @@
             }
 
             // Domain Restriction
-            if (!email.endsWith('@ietdavv.edu.in')) {
+            if (!email || typeof email !== 'string' || !email.endsWith('@ietdavv.edu.in')) {
                 showMessage("Access Denied: Please use your official @ietdavv.edu.in account.");
                 return;
             }
 
-            // Check email-to-name mapping (set by admin)
-            const emailToNameMap = JSON.parse(localStorage.getItem('spark_email_name_map') || '{}');
-            let nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            
-            // Use admin-set name if available
-            if (emailToNameMap[email]) {
-                nameFromEmail = emailToNameMap[email];
+            // Check if face is captured
+            if (!manualFaceDescriptor || manualFaceDescriptor.length === 0) {
+                showMessage("Please capture your face first using the camera.");
+                return;
             }
 
             // Check if user already exists
             let existingUser = null;
+            let existingUsername = null;
             for (let username in registeredUsers) {
-                if (registeredUsers[username].email === email) {
-                    existingUser = { username, ...registeredUsers[username] };
-                    // Update name if admin has set it
-                    if (emailToNameMap[email] && emailToNameMap[email] !== existingUser.name) {
-                        existingUser.name = emailToNameMap[email];
-                        registeredUsers[username].name = emailToNameMap[email];
-                        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                    }
+                if (registeredUsers[username] && (registeredUsers[username].email === email || registeredUsers[username].id === collegeId)) {
+                    existingUser = registeredUsers[username];
+                    existingUsername = username;
                     break;
                 }
             }
 
             if (existingUser) {
-                loggedInUser = existingUser;
+                // Update existing user with new face data
+                const usernamePrefix = existingUsername && existingUsername.length >= 3 ? existingUsername.substring(0, 3).toUpperCase() : 'USR';
+                const uniqueFaceKey = "FACE_" + Date.now() + "_" + Math.floor(Math.random() * 100000) + "_" + usernamePrefix;
+                
+                registeredUsers[existingUsername] = {
+                    ...existingUser,
+                    name: fullname,
+                    email: email,
+                    id: collegeId,
+                    course: course,
+                    studentClass: studentClass,
+                    descriptor: manualFaceDescriptor,
+                    faceKey: uniqueFaceKey,
+                    faceVideoFrames: manualVideoFrames, // Store video frames
+                    faceRegisteredAt: new Date().toISOString()
+                };
+                
+                loggedInUser = {
+                    username: existingUsername,
+                    ...registeredUsers[existingUsername]
+                };
                 saveSession(loggedInUser);
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                
+                stopManualFaceRegistration();
+                hideManualEntryForm();
+                
                 toggleMainApp(true);
                 populateProfileData();
                 updateDashboardProfile();
-                showMessage("Welcome back, " + existingUser.name + "!");
-                hideManualEmailInput();
+                showMessage("Welcome back, " + fullname + "! Face updated successfully.");
             } else {
-                // NEW USER - Check if student is added by admin
-                // Find admin-added student by email or name and get their key
-                let adminAddedKey = null;
-                let adminUser = null;
+                // NEW USER - Create new user with face registration
+                const safeFullname = fullname || 'user';
+                const username = safeFullname.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000);
+                const usernamePrefix = username && username.length >= 3 ? username.substring(0, 3).toUpperCase() : 'USR';
+                const uniqueFaceKey = "FACE_" + Date.now() + "_" + Math.floor(Math.random() * 100000) + "_" + usernamePrefix;
                 
-                for (const key in registeredUsers) {
-                    const user = registeredUsers[key];
-                    if (user.role === 'student') {
-                        // Check by email first
-                        if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
-                            adminAddedKey = key;
-                            adminUser = user;
-                            break;
-                        }
-                        // Check by name if email not found
-                        if (user.name && user.name.toLowerCase() === nameFromEmail.toLowerCase()) {
-                            adminAddedKey = key;
-                            adminUser = user;
-                            break;
-                        }
-                    }
-                }
-                
-                if (!adminAddedKey || !adminUser) {
-                    showMessage("Not allowed. Contact admin.");
-                    hideManualEmailInput();
-                    return;
-                }
-                
-                // Update existing admin-added user entry with email if not present
-                if (!adminUser.email) {
-                    adminUser.email = email;
-                }
-                adminUser.username = adminAddedKey;
-                
-                registeredUsers[adminAddedKey] = adminUser;
+                const newUser = {
+                    username: username,
+                    name: fullname,
+                    email: email,
+                    id: collegeId,
+                    role: 'student',
+                    course: course,
+                    studentClass: studentClass,
+                    descriptor: manualFaceDescriptor,
+                    faceKey: uniqueFaceKey,
+                    faceVideoFrames: manualVideoFrames, // Store video frames
+                    faceRegisteredAt: new Date().toISOString()
+                };
+
+                registeredUsers[username] = newUser;
                 localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
 
-                loggedInUser = { username: adminAddedKey, ...adminUser };
+                loggedInUser = newUser;
                 saveSession(loggedInUser);
+                
+                stopManualFaceRegistration();
+                hideManualEntryForm();
+                
                 toggleMainApp(true);
                 populateProfileData();
                 updateDashboardProfile();
-                showMessage("Welcome, " + adminUser.name + "! Please register face ID during attendance.");
-                hideManualEmailInput();
+                showMessage("Welcome, " + fullname + "! Registration successful with face ID.");
             }
         };
 
@@ -3372,10 +3683,47 @@
             return R * c; // in metres
         }
 
-        // Load face-api models
-        const loadModels = async () => {
-            loading.classList.remove('hidden');
-            document.getElementById('role-selection').classList.add('hidden'); // Hide role select while loading
+        // Track if models are loaded
+        let modelsLoaded = false;
+        let modelsLoading = false;
+
+        // Load face-api models (lazy load - only when needed)
+        const loadModels = async (showLoading = false) => {
+            // If already loaded, return immediately
+            if (modelsLoaded) {
+                return Promise.resolve();
+            }
+            
+            // If already loading, wait for it
+            if (modelsLoading) {
+                return new Promise((resolve) => {
+                    const checkLoaded = setInterval(() => {
+                        if (modelsLoaded) {
+                            clearInterval(checkLoaded);
+                            resolve();
+                        }
+                    }, 100);
+                });
+            }
+
+            modelsLoading = true;
+            
+            // Check if faceapi is available
+            if (typeof faceapi === 'undefined' || !faceapi.nets) {
+                // Wait a bit for script to load
+                await new Promise(resolve => setTimeout(resolve, 100));
+                if (typeof faceapi === 'undefined' || !faceapi.nets) {
+                    modelsLoading = false;
+                    throw new Error('Face API library not loaded yet');
+                }
+            }
+
+            if (showLoading) {
+                loading.classList.remove('hidden');
+                const roleSelection = document.getElementById('role-selection');
+                if (roleSelection) roleSelection.classList.add('hidden');
+            }
+
             try {
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
@@ -3383,38 +3731,84 @@
                     faceapi.nets.faceRecognitionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
                     faceapi.nets.faceExpressionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
                 ]);
-                loading.classList.add('hidden');
-                // Show role selection instead of student home initially
-                document.getElementById('role-selection').classList.remove('hidden');
+                modelsLoaded = true;
+                modelsLoading = false;
+                
+                if (showLoading) {
+                    loading.classList.add('hidden');
+                    const roleSelection = document.getElementById('role-selection');
+                    if (roleSelection) roleSelection.classList.remove('hidden');
+                }
             } catch (err) {
                 console.error(err);
-                showMessage("Failed to load face models.");
-                loading.classList.add('hidden');
-                document.getElementById('role-selection').classList.remove('hidden');
+                modelsLoading = false;
+                if (showLoading) {
+                    showMessage("Failed to load face models.");
+                    loading.classList.add('hidden');
+                    const roleSelection = document.getElementById('role-selection');
+                    if (roleSelection) roleSelection.classList.remove('hidden');
+                }
+                throw err;
             }
         };
 
         // Update canvas size
         function updateCanvasSize(video, canvas) {
             if (!video || !canvas) return;
-            canvas.width = video.offsetWidth;
-            canvas.height = video.offsetHeight;
-            faceapi.matchDimensions(canvas, { width: canvas.width, height: canvas.height });
+            try {
+                canvas.width = video.offsetWidth || video.videoWidth || 640;
+                canvas.height = video.offsetHeight || video.videoHeight || 480;
+                if (typeof faceapi !== 'undefined' && faceapi.matchDimensions) {
+                    faceapi.matchDimensions(canvas, { width: canvas.width, height: canvas.height });
+                }
+            } catch (err) {
+                console.error('Error updating canvas size:', err);
+            }
         }
 
         // Start camera & detect face
         const startVideo = async (video, canvas, mode) => {
+            // Validate inputs
+            if (!video || !canvas) {
+                console.error('Video or canvas element is missing');
+                showMessage("Camera elements not available.");
+                return;
+            }
+
             stopAllVideo();
+            
+            // Load models if not already loaded (only for face recognition modes)
+            if ((mode === 'register' || mode === 'login' || mode === 'attendance') && !modelsLoaded) {
+                try {
+                    showMessage("Loading face recognition models...");
+                    await loadModels(true);
+                } catch (err) {
+                    console.error('Failed to load models:', err);
+                    showMessage("Failed to load face recognition. Please refresh the page.");
+                    return;
+                }
+            }
+            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (!stream) {
+                    showMessage("Could not access camera.");
+                    return;
+                }
                 video.srcObject = stream;
                 video.onloadedmetadata = () => {
                     video.play();
                     // Set canvas size after a short delay for rendering
                     setTimeout(() => updateCanvasSize(video, canvas), 200);
                     // Optional: Listen for resize (modern browsers)
-                    const resizeObserver = new ResizeObserver(() => updateCanvasSize(video, canvas));
-                    resizeObserver.observe(video.parentElement);
+                    if (typeof ResizeObserver !== 'undefined' && video.parentElement) {
+                        try {
+                            const resizeObserver = new ResizeObserver(() => updateCanvasSize(video, canvas));
+                            resizeObserver.observe(video.parentElement);
+                        } catch (err) {
+                            console.warn('ResizeObserver not supported:', err);
+                        }
+                    }
                     if (mode === 'register') {
                         isVideoRegPlaying = true;
                         detectFace(video, canvas, mode);
@@ -3434,7 +3828,30 @@
 
         // Detect face
         const detectFace = (video, canvas, mode) => {
+            // Validate inputs
+            if (!video || !canvas) {
+                console.error('Video or canvas element is missing');
+                return;
+            }
+
+            // Ensure models are loaded before starting detection
+            if (!modelsLoaded && (mode === 'register' || mode === 'login' || mode === 'attendance')) {
+                console.warn('Models not loaded yet, waiting...');
+                // Try to load models and retry
+                loadModels().then(() => {
+                    detectFace(video, canvas, mode);
+                }).catch(err => {
+                    console.error('Failed to load models for face detection:', err);
+                    showMessage("Face recognition models not ready. Please refresh the page.");
+                });
+                return;
+            }
+            
             const context = canvas.getContext('2d');
+            if (!context) {
+                console.error('Could not get canvas context');
+                return;
+            }
             const interval = setInterval(async () => {
                 let isPlaying;
                 if (mode === 'register') isPlaying = isVideoRegPlaying;
@@ -3449,7 +3866,21 @@
                     return;
                 }
                 context.clearRect(0, 0, canvas.width, canvas.height);
-                const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceExpressions().withFaceDescriptor();
+                
+                // Check if faceapi is available
+                if (typeof faceapi === 'undefined' || !faceapi.detectSingleFace) {
+                    console.warn('Face API not available');
+                    return;
+                }
+                
+                let detections;
+                try {
+                    detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceExpressions().withFaceDescriptor();
+                } catch (err) {
+                    console.error('Face detection error:', err);
+                    return; // Continue to next iteration
+                }
+                
                 if (detections) {
                     const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
                     faceapi.draw.drawDetections(canvas, resizedDetections);
@@ -3467,8 +3898,17 @@
 
                             for (const username in registeredUsers) {
                                 const user = registeredUsers[username];
-                                if (user.descriptor) {
-                                    const dist = faceapi.euclideanDistance(currentDescriptor, new Float32Array(user.descriptor));
+                                if (user && user.descriptor && user.descriptor.length > 0) {
+                                    let dist;
+                                    try {
+                                        if (!user.descriptor || !Array.isArray(user.descriptor)) {
+                                            continue;
+                                        }
+                                        dist = faceapi.euclideanDistance(currentDescriptor, new Float32Array(user.descriptor));
+                                    } catch (err) {
+                                        console.error('Error calculating distance:', err);
+                                        continue;
+                                    }
                                     if (dist < 0.5) { // Slightly stricter threshold for registration
                                         duplicateUser = username;
                                         break;
@@ -3485,39 +3925,106 @@
 
                             const regData = window.pendingRegData || {};
                             // Update existing admin-added user entry instead of creating new one
-                            const existingUser = registeredUsers[pendingRegUsername];
+                            const existingUser = registeredUsers[pendingRegUsername] || {};
+                            
+                            // Generate unique face key
+                            const usernamePrefix = pendingRegUsername ? pendingRegUsername.substring(0, 3).toUpperCase() : 'USR';
+                            const uniqueFaceKey = "FACE_" + Date.now() + "_" + Math.floor(Math.random() * 100000) + "_" + usernamePrefix;
+                            
                             registeredUsers[pendingRegUsername] = {
                                 ...existingUser, // Preserve existing admin data
-                                descriptor: Array.from(resizedDetections.descriptor),
+                                descriptor: resizedDetections.descriptor ? Array.from(resizedDetections.descriptor) : [],
+                                faceKey: uniqueFaceKey, // Store unique face key
                                 id: regData.collegeId || existingUser?.id || (pendingRegUsername + "ID"),
                                 role: 'student',
                                 name: regData.fullname || existingUser?.name || pendingRegUsername,
                                 email: regData.email || existingUser?.email || '',
                                 course: regData.course || existingUser?.course || '',
                                 studentClass: regData.studentClass || existingUser?.studentClass || '',
-                                batchId: regData.batchId || existingUser?.batchId || ''
+                                batchId: regData.batchId || existingUser?.batchId || '',
+                                faceRegisteredAt: new Date().toISOString() // Timestamp of registration
                             };
                             
                             // If batch is selected, add email to batch
                             if (regData.batchId && regData.email) {
-                                const batch = batches.find(b => b.id === regData.batchId);
-                                if (batch && !batch.students.includes(regData.email.toLowerCase())) {
-                                    batch.students.push(regData.email.toLowerCase());
-                                    emailToBatchMap[regData.email.toLowerCase()] = regData.batchId;
-                                    saveBatches();
+                                let batches = [];
+                                try {
+                                    batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                                } catch (err) {
+                                    console.error('Error parsing batches:', err);
+                                    batches = [];
+                                }
+                                const batch = safeFindBatch(batches, regData.batchId);
+                                if (batch) {
+                                    if (!Array.isArray(batch.students)) {
+                                        batch.students = [];
+                                    }
+                                    if (!batch.students.includes(regData.email.toLowerCase())) {
+                                        batch.students.push(regData.email.toLowerCase());
+                                        
+                                        try {
+                                            let emailToBatchMap = safeParseJSON('spark_email_batch_map', {});
+                                            emailToBatchMap[regData.email.toLowerCase()] = regData.batchId;
+                                            localStorage.setItem('spark_email_batch_map', JSON.stringify(emailToBatchMap));
+                                            
+                                            // Save batches
+                                            if (typeof saveBatches === 'function') {
+                                                saveBatches();
+                                            } else {
+                                                localStorage.setItem('spark_batches', JSON.stringify(batches));
+                                            }
+                                        } catch (err) {
+                                            console.error('Error saving batch mapping:', err);
+                                        }
+                                    }
                                 }
                             }
-                            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                            showMessage("Identity Verified & Registered!");
+                            try {
+                                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                            } catch (err) {
+                                console.error('Error saving registeredUsers to localStorage:', err);
+                                showMessage("Error saving data. Please try again.");
+                            }
+                            
+                            // Update logged in user with descriptor and face key
+                            loggedInUser.descriptor = Array.from(resizedDetections.descriptor);
+                            loggedInUser.faceKey = uniqueFaceKey;
+                            saveSession(loggedInUser);
+                            
+                            // Hide scan overlay
+                            const scanOverlay = document.getElementById('scan-overlay');
+                            if (scanOverlay) scanOverlay.classList.add('hidden');
+                            
+                            stopAllVideo();
+                            
+                            showMessage("✅ Face registered successfully! (Face Key: " + uniqueFaceKey + ")");
 
                             // Clear pending data
                             delete window.pendingRegData;
-                            goHome();
+                            
+                            // Don't go home, stay in attendance tab
+                            showMessage("Face registration complete! You can now mark attendance.");
                         } else if (livenessMode === 'login') {
                             // Perform Login Match
                             const labeled = Object.entries(registeredUsers)
-                                .filter(([u, data]) => data.descriptor && data.descriptor.length > 0)
-                                .map(([u, data]) => new faceapi.LabeledFaceDescriptors(u, [new Float32Array(data.descriptor)]));
+                                .filter(([u, data]) => data && data.descriptor && Array.isArray(data.descriptor) && data.descriptor.length > 0)
+                                .map(([u, data]) => {
+                                    try {
+                                        try {
+                                            if (!data.descriptor || !Array.isArray(data.descriptor) || data.descriptor.length === 0) {
+                                                return null;
+                                            }
+                                            return new faceapi.LabeledFaceDescriptors(u, [new Float32Array(data.descriptor)]);
+                                        } catch (err) {
+                                            console.error('Error creating LabeledFaceDescriptors:', err);
+                                            return null;
+                                        }
+                                    } catch (err) {
+                                        console.error('Error creating LabeledFaceDescriptors for', u, err);
+                                        return null;
+                                    }
+                                })
+                                .filter(item => item !== null);
 
                             if (labeled.length === 0) {
                                 finalizeAction = false;
@@ -3530,13 +4037,26 @@
 
                             if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.6) {
                                 finalizeAction = false;
+                                
+                                const matchedUserData = registeredUsers[bestMatch.label];
+                                if (!matchedUserData) {
+                                    console.error('Matched user data not found:', bestMatch.label);
+                                    showMessage("User data not found. Please contact admin.");
+                                    return;
+                                }
+                                
                                 loggedInUser = {
                                     username: bestMatch.label,
-                                    descriptor: registeredUsers[bestMatch.label].descriptor
+                                    descriptor: matchedUserData.descriptor
                                 };
-                                document.getElementById('nav-username').textContent = bestMatch.label;
-                                document.getElementById('sidebar-username').textContent = bestMatch.label;
-                                document.getElementById('sidebar-id').textContent = (registeredUsers[bestMatch.label].id || (bestMatch.label + 'ID'));
+                                
+                                const navUsername = document.getElementById('nav-username');
+                                const sidebarUsername = document.getElementById('sidebar-username');
+                                const sidebarId = document.getElementById('sidebar-id');
+                                
+                                if (navUsername) navUsername.textContent = bestMatch.label;
+                                if (sidebarUsername) sidebarUsername.textContent = bestMatch.label;
+                                if (sidebarId) sidebarId.textContent = (matchedUserData.id || (bestMatch.label + 'ID'));
 
                                 toggleMainApp(true);
                                 saveSession(loggedInUser);
@@ -3554,8 +4074,17 @@
                             let duplicateUser = null;
                             for (const username in registeredUsers) {
                                 const user = registeredUsers[username];
-                                if (user.descriptor && username !== loggedInUser.username) {
-                                    const dist = faceapi.euclideanDistance(currentDescriptor, new Float32Array(user.descriptor));
+                                if (user && user.descriptor && user.descriptor.length > 0 && username !== loggedInUser?.username) {
+                                    let dist;
+                                    try {
+                                        if (!user.descriptor || !Array.isArray(user.descriptor)) {
+                                            continue;
+                                        }
+                                        dist = faceapi.euclideanDistance(currentDescriptor, new Float32Array(user.descriptor));
+                                    } catch (err) {
+                                        console.error('Error calculating distance:', err);
+                                        continue;
+                                    }
                                     if (dist < 0.5) {
                                         duplicateUser = username;
                                         break;
@@ -3569,9 +4098,16 @@
                             }
 
                             // ENROLL
-                            registeredUsers[loggedInUser.username].descriptor = Array.from(resizedDetections.descriptor);
-                            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                            loggedInUser.descriptor = registeredUsers[loggedInUser.username].descriptor;
+                            if (registeredUsers[loggedInUser.username]) {
+                                registeredUsers[loggedInUser.username].descriptor = Array.from(resizedDetections.descriptor);
+                                try {
+                                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                            } catch (err) {
+                                console.error('Error saving registeredUsers to localStorage:', err);
+                                showMessage("Error saving data. Please try again.");
+                            }
+                                loggedInUser.descriptor = registeredUsers[loggedInUser.username].descriptor;
+                            }
 
                             showMessage("Face ID Linked! Now starting liveness verification...");
 
@@ -3582,16 +4118,140 @@
                         }
                     }
 
+                    // Automatic attendance marking when face is detected
+                    if (mode === 'attendance' && !isLivenessActive && !finalizeAction) {
+                        // Check if portal is open
+                        const activePortalBatchId = localStorage.getItem('spark_active_attendance_portal');
+                        if (activePortalBatchId) {
+                            // Match face against all registered users
+                            const labeled = Object.entries(registeredUsers)
+                                .filter(([u, data]) => data && data.descriptor && Array.isArray(data.descriptor) && data.descriptor.length > 0)
+                                .map(([u, data]) => {
+                                    try {
+                                        try {
+                                            if (!data.descriptor || !Array.isArray(data.descriptor) || data.descriptor.length === 0) {
+                                                return null;
+                                            }
+                                            return new faceapi.LabeledFaceDescriptors(u, [new Float32Array(data.descriptor)]);
+                                        } catch (err) {
+                                            console.error('Error creating LabeledFaceDescriptors:', err);
+                                            return null;
+                                        }
+                                    } catch (err) {
+                                        console.error('Error creating LabeledFaceDescriptors for', u, err);
+                                        return null;
+                                    }
+                                })
+                                .filter(item => item !== null);
+
+                            if (labeled.length > 0) {
+                                const matcher = new faceapi.FaceMatcher(labeled, 0.6);
+                                const bestMatch = matcher.findBestMatch(resizedDetections.descriptor);
+
+                                // If face matches a registered user
+                                if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.6) {
+                                    const matchedUser = registeredUsers[bestMatch.label];
+                                    if (!matchedUser) {
+                                        console.warn('Matched user not found:', bestMatch.label);
+                                        return;
+                                    }
+                                    
+                                    const studentEmail = matchedUser.email?.toLowerCase() || '';
+                                    
+                                    // Check if matched user is in the active batch
+                                    let batches = [];
+                                    try {
+                                        batches = JSON.parse(localStorage.getItem('spark_batches') || '[]');
+                                    } catch (err) {
+                                        console.error('Error parsing batches:', err);
+                                        batches = [];
+                                    }
+                                    const activeBatch = Array.isArray(batches) ? batches.find(b => b && b.id === activePortalBatchId) : null;
+                                    
+                                    if (activeBatch && activeBatch.students && activeBatch.students.includes(studentEmail)) {
+                                        // Check if already marked attendance today
+                                        let log = [];
+                                        try {
+                                            log = JSON.parse(localStorage.getItem('spark_attendance_log') || '[]');
+                                        } catch (err) {
+                                            console.error('Error parsing attendance log:', err);
+                                            log = [];
+                                        }
+                                        const today = new Date().toDateString();
+                                        const alreadyMarked = log.some(entry => {
+                                            const entryDate = new Date(entry.timestamp).toDateString();
+                                            return entryDate === today && entry.student === bestMatch.label && entry.batchId === activePortalBatchId;
+                                        });
+                                        
+                                        if (!alreadyMarked) {
+                                            // Automatically mark attendance
+                                            finalizeAction = true;
+                                            loggedInUser = {
+                                                username: bestMatch.label,
+                                                descriptor: matchedUser.descriptor,
+                                                faceKey: matchedUser.faceKey
+                                            };
+                                            saveSession(loggedInUser);
+                                            
+                                            // Mark attendance automatically
+                                            const activePortalBatchName = localStorage.getItem('spark_active_attendance_portal_name') || '';
+                                            const logEntry = {
+                                                timestamp: Date.now(),
+                                                className: activePortalBatchName,
+                                                batchId: activePortalBatchId,
+                                                status: 'Present',
+                                                location: 'Verified',
+                                                student: bestMatch.label,
+                                                faceKey: matchedUser.faceKey || 'N/A'
+                                            };
+                                            
+                                            log.push(logEntry);
+                                            try {
+                                                localStorage.setItem('spark_attendance_log', JSON.stringify(log));
+                                            } catch (err) {
+                                                console.error('Error saving attendance log:', err);
+                                            }
+                                            
+                                            // Lock attendance for 1 hour
+                                            const lockUntil = Date.now() + (60 * 60 * 1000);
+                                            localStorage.setItem('attendance_locked_until', lockUntil);
+                                            
+                                            // Update UI
+                                            updateDashboardStats();
+                                            renderRecentActivity();
+                                            checkAttendanceLock();
+                                            
+                                            // Trigger teacher dashboard update if teacher portal is open
+                                            if (typeof updateTeacherStudentOverview === 'function') {
+                                                updateTeacherStudentOverview();
+                                            }
+                                            
+                                            showMessage("✅ Attendance marked automatically for " + (matchedUser.name || bestMatch.label) + "!");
+                                            stopAllVideo();
+                                            
+                                            // Hide camera and show success view
+                                            const cameraView = document.getElementById('attendance-camera-view');
+                                            const lockedView = document.getElementById('attendance-locked-view');
+                                            if (cameraView) cameraView.classList.add('hidden');
+                                            if (lockedView) lockedView.classList.remove('hidden');
+                                            
+                                            return; // Stop further processing
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // Button enabling logic (only if liveness NOT active)
                     if (!isLivenessActive) {
-                        if (mode === 'register') registerBtn.disabled = false;
-                        else if (mode === 'login' && Object.keys(registeredUsers).length > 0) loginBtn.disabled = false;
-                        else if (mode === 'attendance' && loggedInUser) markAttendanceBtn.disabled = false;
+                        if (mode === 'register' && registerBtn) registerBtn.disabled = false;
+                        else if (mode === 'login' && Object.keys(registeredUsers).length > 0 && loginBtn) loginBtn.disabled = false;
+                        else if (mode === 'attendance' && loggedInUser && markAttendanceBtn) markAttendanceBtn.disabled = false;
                     }
-                } else if (mode === 'register') {
-                    registerBtn.disabled = true;
-                } else if (mode === 'attendance') {
-                    markAttendanceBtn.disabled = true;
+                } else {
+                    if (mode === 'register' && registerBtn) registerBtn.disabled = true;
+                    else if (mode === 'attendance' && markAttendanceBtn) markAttendanceBtn.disabled = true;
                 }
             }, 200);
             if (mode === 'register') regInterval = interval;
@@ -3608,6 +4268,49 @@
 
             return fullname && collegeId && course && studentClass;
         };
+
+        // Function to start face registration flow automatically
+        function startFaceRegistrationFlow() {
+            if (!loggedInUser) {
+                showMessage("Please login first.");
+                return;
+            }
+
+            // Switch to attendance tab
+            const attendanceTab = document.querySelector('[data-tab="attendance"]');
+            if (attendanceTab) {
+                attendanceTab.click();
+            }
+
+            // Set up registration mode using attendance video
+            pendingRegUsername = loggedInUser.username;
+            window.pendingRegData = {
+                fullname: loggedInUser.name || loggedInUser.username,
+                collegeId: loggedInUser.id || '',
+                email: loggedInUser.email || '',
+                course: loggedInUser.course || '',
+                studentClass: loggedInUser.studentClass || '',
+                batchId: loggedInUser.batchId || ''
+            };
+
+            // Start face registration using attendance video
+            // Use 'attendance' mode but set livenessMode to 'register' for registration logic
+            livenessMode = 'register';
+            finalizeAction = true;
+
+            // Show scan overlay if it exists
+            const scanOverlay = document.getElementById('scan-overlay');
+            if (scanOverlay) scanOverlay.classList.remove('hidden');
+
+            // Start video for registration (using attendance video but in registration mode)
+            if (videoAttendance && canvasAttendance) {
+                // Start video with 'attendance' mode but registration will be handled by livenessMode
+                startVideo(videoAttendance, canvasAttendance, 'attendance');
+                showMessage("Please position your face in front of the camera to register.");
+            } else {
+                showMessage("Camera not available. Please try again.");
+            }
+        }
 
         // Register button -> Validate profile details and capture face
         if (registerBtn) {
@@ -3635,13 +4338,13 @@
                         let adminAddedKey = null;
                         for (const key in registeredUsers) {
                             const user = registeredUsers[key];
-                            if (user.id === profileId && user.role === 'student') {
+                            if (user && user.id === profileId && user.role === 'student') {
                                 adminAddedKey = key;
                                 break;
                             }
                         }
                         
-                        if (!adminAddedKey) {
+                        if (!adminAddedKey || !registeredUsers[adminAddedKey]) {
                             showMessage("Not allowed. Contact admin.");
                             return;
                         }
@@ -3672,13 +4375,13 @@
                     let adminAddedKey = null;
                     for (const key in registeredUsers) {
                         const user = registeredUsers[key];
-                        if (user.id === collegeId && user.role === 'student') {
+                        if (user && user.id === collegeId && user.role === 'student') {
                             adminAddedKey = key;
                             break;
                         }
                     }
                     
-                    if (!adminAddedKey) {
+                    if (!adminAddedKey || !registeredUsers[adminAddedKey]) {
                         showMessage("Not allowed. Contact admin.");
                         return;
                     }
@@ -3708,8 +4411,10 @@
                 const scanOverlay = document.getElementById('scan-overlay');
                 if (scanOverlay) scanOverlay.classList.remove('hidden');
 
-                registerBtn.textContent = "Scanning...";
-                registerBtn.disabled = true;
+                if (registerBtn) {
+                    registerBtn.textContent = "Scanning...";
+                    registerBtn.disabled = true;
+                }
             });
         }
 
@@ -3740,9 +4445,23 @@
             // We need robust parsing.
 
             for (let cls of timetable) {
-                let startH = parseInt(cls.time.split(':')[0]);
-                if (cls.time.toLowerCase().includes('pm') && startH < 12) startH += 12;
-                if (cls.time.toLowerCase().includes('am') && startH === 12) startH = 0;
+                let startH = 0;
+                try {
+                    if (cls.time && typeof cls.time === 'string') {
+                        const timeParts = cls.time.split(':');
+                        if (timeParts.length > 0) {
+                            startH = parseInt(timeParts[0]) || 0;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error parsing time:', err);
+                    startH = 0;
+                }
+                if (cls.time && typeof cls.time === 'string') {
+                    const timeLower = cls.time.toLowerCase();
+                    if (timeLower.includes('pm') && startH < 12) startH += 12;
+                    if (timeLower.includes('am') && startH === 12) startH = 0;
+                }
 
                 // If saved from Excel, it might be just string "09:00".
                 // Let's assume standard integer hour matching for robustness in this environment.
@@ -3867,7 +4586,7 @@
             }
 
             const now = Date.now();
-            const target = parseInt(lockedUntil);
+            const target = parseInt(lockedUntil) || 0;
 
             if (now < target) {
                 // Locked
@@ -3910,8 +4629,8 @@
             }
         };
 
-        // Start checking lock every second
-        setInterval(checkAttendanceLock, 1000);
+        // Start checking lock every 2 seconds (reduced frequency for better performance)
+        setInterval(checkAttendanceLock, 2000);
 
         // Attendance mark button
         if (markAttendanceBtn) {
@@ -3955,9 +4674,14 @@
         // Helper to finalize attendance after face match + liveness
         async function finalizeAttendance() {
             try {
+                // Ensure models are loaded
+                if (!modelsLoaded) {
+                    await loadModels(true);
+                }
+                
                 // Check if face-api is loaded
                 if (typeof faceapi === 'undefined' || !faceapi.nets || !faceapi.nets.tinyFaceDetector) {
-                    showMessage("Face not detected");
+                    showMessage("Face recognition not ready. Please wait...");
                     return;
                 }
                 
@@ -4155,8 +4879,10 @@
                 };
                 localStorage.setItem('userProfile', JSON.stringify(profile));
                 // Update sidebar if logged in
-                document.getElementById('sidebar-username').textContent = profile.name;
-                document.getElementById('sidebar-id').textContent = profile.id;
+                const sidebarUsername = document.getElementById('sidebar-username');
+                const sidebarId = document.getElementById('sidebar-id');
+                if (sidebarUsername) sidebarUsername.textContent = profile.name;
+                if (sidebarId) sidebarId.textContent = profile.id;
                 showMessage('Profile saved successfully!');
             });
         }
@@ -5143,8 +5869,8 @@
             return div.innerHTML;
         }
 
-        // Start clock update interval
-        setInterval(updateTimetableClock, 1000);
+        // Start clock update interval (every 5 seconds is sufficient for display)
+        setInterval(updateTimetableClock, 5000);
         updateTimetableClock();
         
         // Auto-refresh timetable status every minute
@@ -5205,7 +5931,8 @@
             if (dateEl) dateEl.textContent = dateStr;
             if (timeEl) timeEl.textContent = timeStr;
         }
-        setInterval(updateClock, 1000);
+        // Update clock every 5 seconds (sufficient for display purposes)
+        setInterval(updateClock, 5000);
         updateClock();
 
         document.querySelectorAll('.tab-btn').forEach(button => {
@@ -5263,6 +5990,15 @@
                 // Show selected tab content
                 const targetContent = document.getElementById(tabId);
                 if (targetContent) targetContent.classList.add('active');
+
+                // Start attendance video when attendance tab is opened
+                if (tabId === 'attendance' && loggedInUser && videoAttendance && canvasAttendance) {
+                    // Check if portal is open before starting video
+                    const activePortalBatchId = localStorage.getItem('spark_active_attendance_portal');
+                    if (activePortalBatchId) {
+                        startVideo(videoAttendance, canvasAttendance, 'attendance');
+                    }
+                }
 
                 // Load timetable when timetable tab is opened
                 if (tabId === 'timetable') {
@@ -5933,13 +6669,13 @@
             return `${hours}h ago`;
         }
 
-        // Auto-refresh student overview every 2 seconds when portal is open
+        // Auto-refresh student overview every 5 seconds when portal is open (reduced frequency)
         setInterval(() => {
             const activePortal = localStorage.getItem('spark_active_attendance_portal');
             if (activePortal) {
                 updateTeacherStudentOverview();
             }
-        }, 2000);
+        }, 5000);
 
         // Populate analysis batch select
         function populateAnalysisBatchSelect() {
@@ -8270,6 +9006,11 @@
         });
 
         window.addEventListener('load', async () => {
+            // Show UI immediately without waiting for models
+            const roleSelection = document.getElementById('role-selection');
+            if (roleSelection) roleSelection.classList.remove('hidden');
+            loading.classList.add('hidden');
+
             try {
                 restoreSession();
             } catch (e) {
@@ -8282,8 +9023,11 @@
                 console.error('Form restore error:', e);
             }
 
-            // Always load models regardless of session restore status
-            await loadModels();
+            // Load models in background (non-blocking)
+            // Models will be loaded when actually needed (face recognition)
+            loadModels().catch(err => {
+                console.log('Background model loading failed, will retry when needed:', err);
+            });
         });
     </script>
 
